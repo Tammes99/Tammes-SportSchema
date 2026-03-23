@@ -59,7 +59,7 @@
   header {
     position: relative;
     z-index: 10;
-    padding: 32px 48px 24px;
+    padding: 16px 48px 16px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: flex-start;
@@ -419,8 +419,331 @@
     line-height: 1.7;
   }
 </style>
+
+<style id="shared-nav-css">
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap');
+#dv-nav {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #0D1117;
+  border-bottom: 1px solid #2C3A4A;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 52px;
+  gap: 24px;
+  font-family: 'DM Mono', monospace;
+}
+#dv-nav .nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+#dv-nav .nav-logo {
+  width: 28px;
+  height: 28px;
+  background: #C8102E;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  color: white;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+#dv-nav .nav-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #E2E8F0;
+  white-space: nowrap;
+}
+#dv-nav .nav-subtitle {
+  font-size: 9px;
+  color: #8898AA;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+#dv-nav .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#dv-nav .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.06em;
+  color: #8898AA;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+#dv-nav .nav-link:hover {
+  color: #E2E8F0;
+  background: rgba(255,255,255,0.05);
+  border-color: #2C3A4A;
+}
+#dv-nav .nav-link.active {
+  color: #fff;
+  background: rgba(200,16,46,0.12);
+  border-color: rgba(200,16,46,0.4);
+}
+#dv-nav .nav-link .nav-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+#dv-nav .nav-divider {
+  width: 1px;
+  height: 20px;
+  background: #2C3A4A;
+  margin: 0 4px;
+}
+#dv-nav .nav-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+#dv-nav .nav-badge {
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid #2C3A4A;
+  color: #8898AA;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+#dv-nav .nav-badge.version {
+  border-color: rgba(200,16,46,0.4);
+  color: #ff6b6b;
+}
+@media (max-width: 700px) {
+  #dv-nav { padding: 0 14px; }
+  #dv-nav .nav-subtitle, #dv-nav .nav-meta { display: none; }
+}
+</style>
+
+
+<style id="shared-nav-css">
+.dv-nav {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(13,17,23,0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  font-family: 'Syne', 'DM Sans', sans-serif;
+}
+.dv-nav-inner {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.dv-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.dv-nav-logomark {
+  width: 30px;
+  height: 30px;
+  background: #C8102E;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  color: white;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.dv-nav-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #e2e8f0;
+  line-height: 1.1;
+}
+.dv-nav-subtitle {
+  font-size: 10px;
+  color: #4a5a6a;
+  font-family: 'DM Mono', monospace;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+.dv-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+.dv-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8898AA;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.dv-nav-link:hover {
+  color: #e2e8f0;
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+}
+.dv-nav-link.active {
+  color: #fff;
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.12);
+}
+.dv-nav-link-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.dv-nav-link.active .dv-nav-link-icon {
+  background: rgba(200,16,46,0.2);
+}
+.dv-nav-link-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+}
+.dv-nav-link.active .dv-nav-link-dot {
+  background: #C8102E;
+  opacity: 1;
+}
+.dv-nav-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.dv-nav-version {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #4a5a6a;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dv-nav-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #4a5a6a;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+}
+.dv-nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.07);
+}
+</style>
+
 </head>
 <body>
+
+<nav class="dv-nav">
+  <div class="dv-nav-inner">
+    <a class="dv-nav-brand" href="index.html">
+      <div class="dv-nav-logomark">DV</div>
+      <div>
+        <div class="dv-nav-title">Haven & Industrie</div>
+        <div class="dv-nav-subtitle">Marktonderzoek 2024–2025</div>
+      </div>
+    </a>
+
+    <div class="dv-nav-links">
+      <a class="dv-nav-link active" href="stakeholder_onion.html">
+        <span class="dv-nav-link-dot"></span>
+        Stakeholder Onion
+      </a>
+      <a class="dv-nav-link " href="concurrentie.html">
+        <span class="dv-nav-link-dot"></span>
+        Concurrentieanalyse
+      </a>
+    </div>
+
+    <div class="dv-nav-meta">
+      <span class="dv-nav-version">v5.0</span>
+      <div class="dv-nav-divider"></div>
+      <span class="dv-nav-date" id="nav-date">—</span>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){
+  var d = new Date();
+  var months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  document.getElementById('nav-date').textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+})();
+</script>
+
+
+<nav id="dv-nav">
+  <div class="nav-brand">
+    <div class="nav-logo">DV</div>
+    <div>
+      <div class="nav-title">Haven &amp; Industrie</div>
+      <div class="nav-subtitle">Marktonderzoek 2025</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="concurrentie_dura_vermeer_v5__2_.html">
+      <span class="nav-icon">⬡</span> Concurrentieanalyse
+    </a>
+    <div class="nav-divider"></div>
+    <a class="nav-link active" href="DV_HI_Stakeholder_Onion.html">
+      <span class="nav-icon">◎</span> Stakeholder Onion
+    </a>
+  </div>
+  <div class="nav-meta">
+    <span class="nav-badge">34 types</span>
+    <span class="nav-badge">8 regio's</span>
+    <span class="nav-badge version">v1 — 2025</span>
+  </div>
+</nav>
+
 
 <header>
   <div class="logo-block">
