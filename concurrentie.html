@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concurrentieanalyse v5 – Dura Vermeer Haven & Industrie</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+:root {
+  --dv-red:#C8102E; --dv-dark:#0D1117; --dv-navy:#111827; --dv-slate:#1E2A3A;
+  --dv-border:#2C3A4A; --dv-text:#E2E8F0; --dv-muted:#8898AA;
+  --row-hover:#1A2535;
+  --pmc1:#6366F1; --pmc2:#0EA5E9; --pmc3:#10B981; --pmc4:#F59E0B;
+  --pmc9:#EF4444; --pmc10:#8B5CF6; --pmc11:#EC4899;
+  --tier-a:#EF4444; --tier-b:#F59E0B; --tier-c:#3B82F6; --tier-d:#6B7280;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dv-dark);color:var(--dv-text);font-family:'Inter',sans-serif;font-size:13px;min-height:100vh}
+.page-wrapper{padding:20px 32px 80px;max-width:1800px;margin:0 auto}
+
+/* HEADER */
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:24px;flex-wrap:wrap}
+.header-left{flex:1}
+.brand-tag{display:inline-flex;align-items:center;gap:8px;background:var(--dv-red);color:#fff;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:2px;margin-bottom:14px}
+.brand-tag::before{content:'';width:6px;height:6px;background:rgba(255,255,255,.6);border-radius:50%;display:inline-block}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;line-height:1.15;color:#fff;letter-spacing:-.02em}
+h1 span{color:var(--dv-red)}
+.subtitle{margin-top:6px;color:var(--dv-muted);font-size:12px;max-width:580px;line-height:1.6}
+.meta-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;padding-top:4px}
+.meta-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;padding:4px 10px;border-radius:2px;border:1px solid var(--dv-border);color:var(--dv-muted);text-transform:uppercase}
+.meta-badge.updated{border-color:var(--dv-red);color:#ff6b6b}
+
+/* ══════════════════════════════════════════════
+   FILTER BAR
+══════════════════════════════════════════════ */
+.filter-bar{
+  background:var(--dv-navy);border:1px solid var(--dv-border);border-radius:10px;
+  padding:16px 20px;margin-bottom:20px;
+}
+.filter-bar-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px}
+.filter-bar-title{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dv-muted);display:flex;align-items:center;gap:8px}
+.filter-bar-title::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--dv-red);display:block}
+.filter-actions{display:flex;gap:8px;align-items:center}
+.btn-reset{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:4px;border:1px solid var(--dv-border);background:transparent;color:var(--dv-muted);cursor:pointer;transition:all .15s}
+.btn-reset:hover{border-color:var(--dv-red);color:var(--dv-red)}
+.btn-export{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:4px;border:1px solid var(--dv-border);background:rgba(200,16,46,.12);color:#ff6b6b;cursor:pointer;transition:all .15s}
+.btn-export:hover{background:rgba(200,16,46,.25);border-color:var(--dv-red)}
+
+.filter-rows{display:flex;flex-direction:column;gap:10px}
+.filter-row{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.filter-label{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--dv-muted);min-width:100px;padding-top:6px;flex-shrink:0}
+.filter-pills{display:flex;flex-wrap:wrap;gap:6px}
+
+/* pill */
+.pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 11px;border-radius:20px;font-size:11px;font-family:'Inter',sans-serif;
+  border:1px solid var(--dv-border);background:rgba(255,255,255,.03);
+  color:var(--dv-muted);cursor:pointer;transition:all .15s;user-select:none;white-space:nowrap
+}
+.pill:hover{background:rgba(255,255,255,.07);color:var(--dv-text)}
+.pill.active{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.3)}
+.pill.active.tier-a{background:rgba(239,68,68,.18);border-color:var(--tier-a);color:var(--tier-a)}
+.pill.active.tier-b{background:rgba(245,158,11,.18);border-color:var(--tier-b);color:var(--tier-b)}
+.pill.active.tier-c{background:rgba(59,130,246,.18);border-color:var(--tier-c);color:var(--tier-c)}
+.pill.active.tier-d{background:rgba(107,114,128,.18);border-color:var(--tier-d);color:var(--tier-d)}
+.pill.active.mode-wv{background:rgba(16,185,129,.18);border-color:#10B981;color:#10B981}
+.pill.active.mode-int{background:rgba(139,92,246,.18);border-color:#8B5CF6;color:#8B5CF6}
+.pill.active.mode-growth{background:rgba(245,158,11,.18);border-color:#F59E0B;color:#F59E0B}
+.pill.active.mode-tierd{background:rgba(107,114,128,.25);border-color:#6B7280;color:#a0aec0}
+
+/* company search */
+.company-search-wrap{position:relative;flex:1;min-width:240px;max-width:420px}
+.company-search{
+  width:100%;background:rgba(255,255,255,.05);border:1px solid var(--dv-border);
+  border-radius:20px;padding:5px 14px 5px 32px;font-size:11px;color:var(--dv-text);
+  font-family:'Inter',sans-serif;outline:none;transition:border-color .15s
+}
+.company-search:focus{border-color:rgba(255,255,255,.25)}
+.company-search::placeholder{color:var(--dv-muted)}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--dv-muted);font-size:12px;pointer-events:none}
+.company-suggestions{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:#1c2a3d;border:1px solid #3a4f6a;border-radius:8px;
+  max-height:200px;overflow-y:auto;z-index:200;display:none;
+  box-shadow:0 8px 32px rgba(0,0,0,.6)
+}
+.company-suggestions.open{display:block}
+.sugg-item{padding:7px 14px;font-size:11px;cursor:pointer;color:var(--dv-text);transition:background .1s}
+.sugg-item:hover,.sugg-item.selected{background:rgba(255,255,255,.08)}
+.company-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.company-tag{display:inline-flex;align-items:center;gap:6px;padding:3px 8px 3px 10px;border-radius:12px;background:rgba(200,16,46,.15);border:1px solid rgba(200,16,46,.4);font-size:10px;color:#ff9999}
+.company-tag-remove{cursor:pointer;opacity:.7;font-size:11px;line-height:1}
+.company-tag-remove:hover{opacity:1}
+
+/* active filter summary */
+.filter-summary{font-family:'DM Mono',monospace;font-size:9px;color:var(--dv-muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--dv-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.filter-count{color:#fff;font-weight:500}
+
+/* ══════════════════════════════════════════════
+   TIER LEGEND
+══════════════════════════════════════════════ */
+.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.legend-card{padding:12px 14px;background:var(--dv-navy);border:1px solid var(--dv-border);border-radius:6px;border-top:3px solid transparent}
+.legend-card.la{border-top-color:var(--tier-a)}.legend-card.lb{border-top-color:var(--tier-b)}
+.legend-card.lc{border-top-color:var(--tier-c)}.legend-card.ld{border-top-color:var(--tier-d)}
+.legend-tier{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;margin-bottom:3px}
+.la .legend-tier{color:var(--tier-a)}.lb .legend-tier{color:var(--tier-b)}.lc .legend-tier{color:var(--tier-c)}.ld .legend-tier{color:var(--tier-d)}
+.legend-label{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--dv-muted);margin-bottom:4px}
+.legend-desc{font-size:10.5px;color:var(--dv-text);line-height:1.5}
+
+/* ══════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════ */
+.table-wrapper{overflow-x:auto;border:1px solid var(--dv-border);border-radius:8px;box-shadow:0 4px 40px rgba(0,0,0,.5);margin-bottom:24px}
+table{width:100%;border-collapse:collapse;min-width:1300px}
+thead tr.pmc-header th{padding:0;position:sticky;top:0;z-index:10}
+.pmc-cell{padding:12px 12px 8px;text-align:left;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:.04em;background:var(--dv-slate);border-bottom:2px solid var(--dv-border);border-right:1px solid var(--dv-border);vertical-align:bottom}
+.pmc-cell:last-child{border-right:none}
+.pmc-cell.port-header{color:var(--dv-muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em;min-width:170px}
+.pmc-code{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;display:block;margin-bottom:3px;opacity:.7}
+.pmc-name{display:block;font-size:10.5px;line-height:1.3}
+.pmc-sub{font-family:'DM Mono',monospace;font-weight:400;font-size:9px;display:block;color:var(--dv-muted);margin-top:2px;line-height:1.4}
+.pmc-bar{height:3px;width:100%;display:block;margin-bottom:8px;border-radius:1px}
+/* PMC column hide */
+.col-hidden{display:none}
+tbody tr{border-bottom:1px solid var(--dv-border);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--row-hover)}
+tbody tr.row-hidden{display:none}
+td{padding:10px 12px;vertical-align:top;border-right:1px solid var(--dv-border);line-height:1.5}
+td:last-child{border-right:none}
+td.port-name{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:#fff;background:var(--dv-navy);min-width:170px;position:sticky;left:0;z-index:5;border-right:2px solid var(--dv-border)}
+.port-region{font-family:'DM Mono',monospace;font-weight:400;font-size:9px;color:var(--dv-muted);display:block;margin-top:2px;text-transform:uppercase;letter-spacing:.08em}
+
+/* INTENSITY BADGE on port-name cell */
+.intensity-badge{display:inline-block;margin-top:5px;font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;letter-spacing:.05em}
+.ib-high{background:rgba(239,68,68,.18);color:var(--tier-a);border:1px solid rgba(239,68,68,.3)}
+.ib-med{background:rgba(245,158,11,.18);color:var(--tier-b);border:1px solid rgba(245,158,11,.3)}
+.ib-low{background:rgba(59,130,246,.18);color:var(--tier-c);border:1px solid rgba(59,130,246,.3)}
+
+/* CHIPS */
+.competitors{display:flex;flex-direction:column;gap:3px}
+.chip{position:relative;display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--dv-text);padding:3px 8px;border-radius:3px;background:rgba(255,255,255,.04);cursor:default;line-height:1.4;transition:all .15s}
+.chip:hover{background:rgba(255,255,255,.09)}
+.chip.chip-hidden{display:none}
+.chip.chip-dimmed{opacity:.18}
+.chip.chip-highlighted{background:rgba(200,16,46,.18);border:1px solid rgba(200,16,46,.5);color:#fff}
+/* growth mode */
+.growth-pmc .pmc-bar{animation:pulse-bar 2s ease-in-out infinite}
+@keyframes pulse-bar{0%,100%{opacity:1}50%{opacity:.4}}
+.growth-pmc .pmc-name::after{content:" 📈";font-size:9px}
+/* white-spot mode */
+td.white-spot{background:rgba(16,185,129,.06)!important;outline:1px solid rgba(16,185,129,.25)}
+/* international */
+.chip.intl-flag::after{content:"🌐";font-size:8px;margin-left:2px;opacity:.7}
+/* tier-d highlight */
+.chip.tierd-highlight{background:rgba(107,114,128,.25)!important;outline:1px solid rgba(107,114,128,.5)}
+
+.chip-tier{font-family:'DM Mono',monospace;font-size:8px;padding:1px 5px;border-radius:2px;letter-spacing:.06em;flex-shrink:0;font-weight:500}
+.ta{background:rgba(239,68,68,.18);color:var(--tier-a)}
+.tb{background:rgba(245,158,11,.18);color:var(--tier-b)}
+.tc{background:rgba(59,130,246,.18);color:var(--tier-c)}
+.td{background:rgba(107,114,128,.18);color:var(--tier-d)}
+.fn{font-size:8px;color:var(--dv-red);vertical-align:super;margin-left:1px;font-family:'DM Mono',monospace;font-weight:500}
+
+/* TOOLTIP */
+.chip .tooltip{display:none;position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:8px;width:240px;background:#1c2a3d;border:1px solid #3a4f6a;border-radius:6px;padding:10px 12px;font-size:11px;color:var(--dv-text);line-height:1.55;z-index:200;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.chip .tooltip::before{content:'';position:absolute;right:100%;top:50%;transform:translateY(-50%);border:5px solid transparent;border-right-color:#3a4f6a}
+.chip:hover .tooltip{display:block}
+.tooltip-tier{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid var(--dv-border)}
+.tooltip-tier.ta{color:var(--tier-a)}.tooltip-tier.tb{color:var(--tier-b)}.tooltip-tier.tc{color:var(--tier-c)}.tooltip-tier.td{color:var(--tier-d)}
+.empty-cell{color:var(--dv-border);font-family:'DM Mono',monospace;font-size:10px;padding-top:12px}
+
+/* no-results row */
+#no-results{display:none;text-align:center;padding:40px;color:var(--dv-muted);font-family:'DM Mono',monospace;font-size:11px}
+
+/* FOOTNOTES */
+.footnotes{margin-bottom:24px;padding:16px 20px;background:var(--dv-navy);border:1px solid var(--dv-border);border-radius:6px}
+.footnotes-title{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dv-muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.footnotes-title::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--dv-red);display:block}
+.fn-list{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;list-style:none}
+.fn-list li{font-size:11px;color:var(--dv-text);line-height:1.55;display:flex;gap:8px}
+.fn-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--dv-red);flex-shrink:0;margin-top:2px;font-weight:500}
+
+/* FOOTER */
+.footer{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.footer-block{padding:14px 16px;background:var(--dv-navy);border:1px solid var(--dv-border);border-radius:6px}
+.footer-block-title{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--dv-muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.footer-block-title::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--dv-red);display:block}
+.footer-block ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+.footer-block li{font-size:11px;color:var(--dv-text);display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.footer-block li::before{content:'→';color:var(--dv-red);flex-shrink:0;margin-top:1px;font-size:10px}
+.highlight{color:#F59E0B;font-weight:600}
+
+/* sort indicator */
+.sort-arrow{font-size:8px;margin-left:4px;color:var(--dv-muted)}
+
+/* export overlay */
+#export-msg{position:fixed;bottom:24px;right:24px;background:var(--dv-navy);border:1px solid var(--dv-border);border-radius:8px;padding:12px 18px;font-size:12px;color:var(--dv-text);display:none;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+
+@media(max-width:900px){.legend{grid-template-columns:1fr 1fr}.footer{grid-template-columns:1fr}.fn-list{grid-template-columns:1fr}.page-wrapper{padding:20px 14px 48px}.filter-label{min-width:70px}}
+</style>
+
+<style id="shared-nav-css">
+.dv-nav {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(13,17,23,0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  font-family: 'Syne', 'DM Sans', sans-serif;
+}
+.dv-nav-inner {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.dv-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.dv-nav-logomark {
+  width: 30px;
+  height: 30px;
+  background: #C8102E;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  color: white;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.dv-nav-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #e2e8f0;
+  line-height: 1.1;
+}
+.dv-nav-subtitle {
+  font-size: 10px;
+  color: #4a5a6a;
+  font-family: 'DM Mono', monospace;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+.dv-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+.dv-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8898AA;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.dv-nav-link:hover {
+  color: #e2e8f0;
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+}
+.dv-nav-link.active {
+  color: #fff;
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.12);
+}
+.dv-nav-link-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.dv-nav-link.active .dv-nav-link-icon {
+  background: rgba(200,16,46,0.2);
+}
+.dv-nav-link-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+}
+.dv-nav-link.active .dv-nav-link-dot {
+  background: #C8102E;
+  opacity: 1;
+}
+.dv-nav-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.dv-nav-version {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #4a5a6a;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dv-nav-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #4a5a6a;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+}
+.dv-nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.07);
+}
+</style>
+
+</head>
+<body>
+
+<nav class="dv-nav">
+  <div class="dv-nav-inner">
+    <a class="dv-nav-brand" href="index.html">
+      <div class="dv-nav-logomark">DV</div>
+      <div>
+        <div class="dv-nav-title">Haven & Industrie</div>
+        <div class="dv-nav-subtitle">Marktonderzoek 2024–2025</div>
+      </div>
+    </a>
+
+    <div class="dv-nav-links">
+      <a class="dv-nav-link " href="stakeholder_onion.html">
+        <span class="dv-nav-link-dot"></span>
+        Stakeholder Onion
+      </a>
+      <a class="dv-nav-link active" href="concurrentie.html">
+        <span class="dv-nav-link-dot"></span>
+        Concurrentieanalyse
+      </a>
+    </div>
+
+    <div class="dv-nav-meta">
+      <span class="dv-nav-version">v5.0</span>
+      <div class="dv-nav-divider"></div>
+      <span class="dv-nav-date" id="nav-date">—</span>
+    </div>
+  </div>
+</nav>
+<script>
+(function(){
+  var d = new Date();
+  var months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  document.getElementById('nav-date').textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+})();
+</script>
+
+<div class="page-wrapper" id="main-content">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="brand-tag">Interne Marktstudie 2025 — Versie 5</div>
+    <h1>Concurrentieanalyse<br><span>Dura Vermeer Haven & Industrie</span></h1>
+    <p class="subtitle">Interactief dashboard met 10 filters. Hover over een concurrent voor redenering & achtergrond. Gebruik de filterbalk om te focussen op relevante haven/PMC/tier-combinaties.</p>
+  </div>
+  <div class="meta-badges">
+    <div class="meta-badge">8 Havens</div>
+    <div class="meta-badge">7 PMC's</div>
+    <div class="meta-badge">4 Tiers</div>
+    <div class="meta-badge updated">v5 — herzien</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FILTER BAR
+══════════════════════════════════════════════ -->
+<div class="filter-bar" id="filter-bar">
+  <div class="filter-bar-top">
+    <div class="filter-bar-title">Filters</div>
+    <div class="filter-actions">
+      <button class="btn-reset" onclick="resetFilters()">↺ Reset alle filters</button>
+      <button class="btn-export" onclick="exportPNG()">⬇ Exporteer als PNG</button>
+    </div>
+  </div>
+
+  <div class="filter-rows">
+
+    <!-- ROW 1: TIER -->
+    <div class="filter-row">
+      <div class="filter-label">Tier</div>
+      <div class="filter-pills" id="pills-tier">
+        <span class="pill active tier-a" data-group="tier" data-val="A" onclick="togglePill(this)">Tier A</span>
+        <span class="pill active tier-b" data-group="tier" data-val="B" onclick="togglePill(this)">Tier B</span>
+        <span class="pill active tier-c" data-group="tier" data-val="C" onclick="togglePill(this)">Tier C</span>
+        <span class="pill active tier-d" data-group="tier" data-val="D" onclick="togglePill(this)">Tier D</span>
+      </div>
+    </div>
+
+    <!-- ROW 2: HAVEN -->
+    <div class="filter-row">
+      <div class="filter-label">Haven</div>
+      <div class="filter-pills" id="pills-haven">
+        <span class="pill active" data-group="haven" data-val="rotterdam" onclick="togglePill(this)">Rotterdam</span>
+        <span class="pill active" data-group="haven" data-val="amsterdam" onclick="togglePill(this)">Amsterdam</span>
+        <span class="pill active" data-group="haven" data-val="groningen" onclick="togglePill(this)">Groningen</span>
+        <span class="pill active" data-group="haven" data-val="northsea" onclick="togglePill(this)">North Sea Port</span>
+        <span class="pill active" data-group="haven" data-val="moerdijk" onclick="togglePill(this)">Moerdijk</span>
+        <span class="pill active" data-group="haven" data-val="zwolle" onclick="togglePill(this)">Zwolle</span>
+        <span class="pill active" data-group="haven" data-val="denhelder" onclick="togglePill(this)">Den Helder</span>
+        <span class="pill active" data-group="haven" data-val="brabant" onclick="togglePill(this)">Brabant</span>
+      </div>
+    </div>
+
+    <!-- ROW 3: PMC -->
+    <div class="filter-row">
+      <div class="filter-label">PMC</div>
+      <div class="filter-pills" id="pills-pmc">
+        <span class="pill active" data-group="pmc" data-val="pmc01" onclick="togglePill(this)" style="border-color:var(--pmc1)">PMC01 Droge Infra</span>
+        <span class="pill active" data-group="pmc" data-val="pmc02" onclick="togglePill(this)" style="border-color:var(--pmc2)">PMC02 Natte Bulk</span>
+        <span class="pill active" data-group="pmc" data-val="pmc03" onclick="togglePill(this)" style="border-color:var(--pmc3)">PMC03 Break Bulk</span>
+        <span class="pill active" data-group="pmc" data-val="pmc04" onclick="togglePill(this)" style="border-color:var(--pmc4)">PMC04 Industrial</span>
+        <span class="pill active" data-group="pmc" data-val="pmc09" onclick="togglePill(this)" style="border-color:var(--pmc9)">PMC09 Energie</span>
+        <span class="pill active" data-group="pmc" data-val="pmc10" onclick="togglePill(this)" style="border-color:var(--pmc10)">PMC10 Defensie</span>
+        <span class="pill active" data-group="pmc" data-val="pmc11" onclick="togglePill(this)" style="border-color:var(--pmc11)">PMC11 Pharma</span>
+      </div>
+    </div>
+
+    <!-- ROW 4: BEDRIJF ZOEKEN -->
+    <div class="filter-row">
+      <div class="filter-label">Bedrijf</div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+        <div class="company-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="company-search" id="company-input" type="text" placeholder="Zoek bedrijf (bijv. BAM, Heijmans)..." autocomplete="off" oninput="onCompanyInput()" onkeydown="onCompanyKey(event)">
+          <div class="company-suggestions" id="company-suggestions"></div>
+        </div>
+        <div class="company-tags" id="company-tags"></div>
+      </div>
+    </div>
+
+    <!-- ROW 5: SPECIALE MODI -->
+    <div class="filter-row">
+      <div class="filter-label">Modus</div>
+      <div class="filter-pills">
+        <span class="pill" id="pill-sort" onclick="toggleMode('sort')" title="Sorteer havens op concurrentie-intensiteit (meeste Tier-A rivalen bovenaan)">⬆ Sorteer op intensiteit</span>
+        <span class="pill" id="pill-wv" onclick="toggleMode('whitespots')" title="Markeer cellen met weinig concurrentie (alleen Tier C/D of leeg)">🔍 Witte vlekken</span>
+        <span class="pill" id="pill-tierd" onclick="toggleMode('tierd')" title="Highlight alleen Tier D partijen — opkomende concurrenten om te monitoren">👁 Tier D monitor</span>
+        <span class="pill" id="pill-intl" onclick="toggleMode('international')" title="Markeer internationale spelers (DEME, Jan De Nul, Hochtief, Ferrovial, Technip, etc.)">🌐 Internationaal</span>
+        <span class="pill" id="pill-growth" onclick="toggleMode('growth')" title="Highlight groeiende marktsegmenten: PMC09 (energie) en PMC04 (CO₂/industrial)">📈 Groeimarkten</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="filter-summary">
+    <span id="filter-summary-text">Alle filters actief — <span class="filter-count" id="visible-count">–</span> rijen zichtbaar</span>
+    <span id="active-modes-label" style="color:var(--dv-muted)"></span>
+  </div>
+</div>
+
+<!-- TIER LEGEND -->
+<div class="legend">
+  <div class="legend-card la"><div class="legend-tier">Tier A</div><div class="legend-label">Structurele kernrivaal</div><div class="legend-desc">Vaste, grote marktpositie. Altijd aanwezig in longlist én shortlist. Directe concurrentie op prijs én kwaliteit.</div></div>
+  <div class="legend-card lb"><div class="legend-tier">Tier B</div><div class="legend-label">Actieve concurrent</div><div class="legend-desc">Regelmatig aanwezig in tenders, maar niet dominant. Winnen projecten, minder frequent dan Tier A.</div></div>
+  <div class="legend-card lc"><div class="legend-tier">Tier C</div><div class="legend-label">Incidentele concurrent</div><div class="legend-desc">Sporadisch actief. Beperkte NL-footprint of sterk gespecialiseerd in deelniche. Geen vaste aanwezigheid.</div></div>
+  <div class="legend-card ld"><div class="legend-tier">Tier D</div><div class="legend-label">Potentieel / opkomend</div><div class="legend-desc">Momenteel beperkte overlap maar relevante marktbeweging. Monitoren op upgraderisico.</div></div>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrapper" id="table-wrapper">
+<table id="main-table">
+<thead>
+  <tr class="pmc-header">
+    <th class="pmc-cell port-header" onclick="toggleSort()" style="cursor:pointer" title="Klik om te sorteren op intensiteit">Haven <span class="sort-arrow" id="sort-arrow">↕</span></th>
+    <th class="pmc-cell" data-pmc="pmc01"><span class="pmc-bar" style="background:var(--pmc1)"></span><span class="pmc-code">PMC01</span><span class="pmc-name">Droge Infra</span><span class="pmc-sub">Civiel · asfalt · terreinen</span></th>
+    <th class="pmc-cell" data-pmc="pmc02"><span class="pmc-bar" style="background:var(--pmc2)"></span><span class="pmc-code">PMC02</span><span class="pmc-name">Natte Bulk</span><span class="pmc-sub">Tankterminals</span></th>
+    <th class="pmc-cell" data-pmc="pmc03"><span class="pmc-bar" style="background:var(--pmc3)"></span><span class="pmc-code">PMC03</span><span class="pmc-name">Break Bulk</span><span class="pmc-sub">Containerterminals · kades</span></th>
+    <th class="pmc-cell" data-pmc="pmc04"><span class="pmc-bar" style="background:var(--pmc4)"></span><span class="pmc-code">PMC04</span><span class="pmc-name">Industrial Plants</span><span class="pmc-sub">CO₂-opslag · procesindustrie</span></th>
+    <th class="pmc-cell" data-pmc="pmc09"><span class="pmc-bar" style="background:var(--pmc9)"></span><span class="pmc-code">PMC09</span><span class="pmc-name">Private Energie</span><span class="pmc-sub">BESS · substations · walstroom · EV</span></th>
+    <th class="pmc-cell" data-pmc="pmc10"><span class="pmc-bar" style="background:var(--pmc10)"></span><span class="pmc-code">PMC10</span><span class="pmc-name">Defensie</span><span class="pmc-sub">Marinebases · militaire infra</span></th>
+    <th class="pmc-cell" data-pmc="pmc11"><span class="pmc-bar" style="background:var(--pmc11)"></span><span class="pmc-code">PMC11</span><span class="pmc-name">Pharma & Bio</span><span class="pmc-sub">Life sciences · cleanroom</span></th>
+  </tr>
+</thead>
+<tbody id="table-body">
+
+<!-- ═══ PORT OF ROTTERDAM ═══ -->
+<tr data-haven="rotterdam" data-intensity="28">
+  <td class="port-name">Port of Rotterdam<span class="port-region">Zuid-Holland</span></td>
+  <td data-pmc="pmc01"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="VolkerWessels"><span class="chip-tier ta">A</span>VolkerWessels / VolkerInfra<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Grootste civiele aannemer in NL. VolkerInfra dominant in havengebonden wegenbouw, terreinen en infra. Altijd aanwezig op tenders in het Rotterdamse havengebied.</div></div>
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra Nederland<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Samen met VolkerWessels marktleider in civiele haveninfra. Breed portfolio; actief op alle grote haveninfra-projecten Rotterdam. Sterke lokale netwerken en raamcontracten.</div></div>
+    <div class="chip" data-tier="A" data-company="Heijmans"><span class="chip-tier ta">A</span>Heijmans Infra<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk in droge infra en terreinen. Groeiende havenambities; regelmatig winnaar van grote civiele opdrachten in Maasvlakte-regio.</div></div>
+    <div class="chip" data-tier="A" data-company="Strukton"><span class="chip-tier ta">A</span>Strukton Wegen<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Gespecialiseerd in wegenbouw en terreinfundering. Vaste aanwezigheid in havengebied Rotterdam; sterke positie op asfalt en havenverharding.</div></div>
+    <div class="chip" data-tier="A" data-company="Ballast Nedam"><span class="chip-tier ta">A</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Na herpositionering onder BESIX Group weer volledig operationeel. Actief in complexe civiele en maritieme projecten Rotterdam. Sterk in D&C-aanpak.</div></div>
+    <div class="chip" data-tier="A" data-company="KWS Infra (VolkerWessels)"><span class="chip-tier ta">A</span>KWS Infra (VolkerWessels)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>VolkerWessels-dochter gespecialiseerd in wegenbouw, asfalt en havenverhardingen. Apart vermeld naast VolkerWessels-paraplu omdat KWS op PMC01 direct concurreert met DV H&I op asfalt en terreinverharding. Zie voetnoot 8.</div></div>
+    <div class="chip" data-tier="B" data-company="Van Gelder"><span class="chip-tier tb">B</span>Van Gelder Groep<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Regionaal sterk (Brabant/Rotterdam-regio). Gespecialiseerd in grondverzet en terreinen. Consistent aanwezig op middelgrote opdrachten.</div></div>
+    <div class="chip" data-tier="B" data-company="Besix Nederland"><span class="chip-tier tb">B</span>Besix Nederland<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Nederlandse arm van Belgische BESIX Group. Actief op complexe civiele projecten; toenemende zichtbaarheid op NL havenmarkt.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Sterk in grondverzet, industriële terreinen en havengebonden civiele werken. Vaste aanwezigheid Rotterdamse haven- en industriegebied.</div></div>
+    <div class="chip" data-tier="B" data-company="De Vries & van de Wiel"><span class="chip-tier tb">B</span>De Vries & van de Wiel<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Zwaar grondverzetbedrijf actief op grote civiele projecten in havens en industrie. Actief in Rotterdam, Moerdijk en Brabant op havengebonden grondwerk en civiele constructies.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Ferrovial" data-intl="1"><span class="chip-tier tc">C</span>Ferrovial Construction NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Spaanse multinational met NL-entiteit. Beperkte haven-specifieke focus; selectieve deelname aan grote tenders.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Hochtief" data-intl="1"><span class="chip-tier tc">C</span>Hochtief (via VINCI)<span class="fn">¹</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Via VINCI-structuur actief in NL. Beperkte directe havenactiviteit. Zie voetnoot 1.</div></div>
+    <div class="chip" data-tier="C" data-company="Martens en Van Oord Groep"><span class="chip-tier tc">C</span>Martens en Van Oord Groep<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Grondverzetspecialist en milieubedrijf (niet gerelateerd aan Van Oord maritiem). Actief op havengebonden grondverzet, sloopwerk en milieusanering in Rotterdam, Groningen en Moerdijk.</div></div>
+    <div class="chip" data-tier="D" data-company="Reimert"><span class="chip-tier td">D</span>Reimert Bouw & Infra<div class="tooltip"><div class="tooltip-tier td">Tier D — Potentiële concurrent</div>Regionaal grondverzetbedrijf. Groeiende footprint richting haven-gerelateerde terreinen. Monitoren.</div></div>
+  </div></td>
+  <td data-pmc="pmc02"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="Bilfinger" data-intl="1"><span class="chip-tier ta">A</span>Bilfinger Tebodin<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Marktleider in engineering & constructie van tankterminals NL. Dominant op EPCM-tenders Rotterdam.</div></div>
+    <div class="chip intl-flag" data-tier="A" data-company="CB&I McDermott" data-intl="1"><span class="chip-tier ta">A</span>CB&I / McDermott<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Internationale specialist in tankopslag en procesindustrie. Sterke aanwezigheid Rotterdam (o.a. Vopak, Botlek).</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Gespecialiseerd in industrieel onderhoud én nieuwbouw tankterminals. Vaste relaties bij Vopak en LBC Rotterdam.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans Bouw & Techniek<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op bouwtechnische kant tankterminal-projecten. Minder sterk op procesinstallaties maar relevant op integrale projecten.</div></div>
+  </div></td>
+  <td data-pmc="pmc03"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra / BAM Civiel<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Grootste civiele aannemer NL. Uitgebreide referenties kademuren, containerterminals (o.a. ECT, Maasvlakte 2).</div></div>
+    <div class="chip" data-tier="A" data-company="Boskalis"><span class="chip-tier ta">A</span>Boskalis Nederland<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Wereldspeler maritieme infra en baggerwerk. Vaste aanwezigheid bij alle grote havenuitbreidingen Rotterdam.</div></div>
+    <div class="chip" data-tier="A" data-company="Van Oord"><span class="chip-tier ta">A</span>Van Oord<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Naast Boskalis de andere NL maritieme grootmacht. Sterke positie op Maasvlakte-gerelateerde projecten.</div></div>
+    <div class="chip intl-flag" data-tier="A" data-company="DEME" data-intl="1"><span class="chip-tier ta">A</span>DEME<span class="fn">²</span><div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Belgische maritieme aannemer (Breda NL-kantoor). Even groot als Boskalis/Van Oord. Sterk in kademuren en havenconstructie. Zie voetnoot 2.</div></div>
+    <div class="chip" data-tier="A" data-company="TBI Mobilis"><span class="chip-tier ta">A</span>TBI Mobilis<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Gespecialiseerd in kade- en oeverconstructies, stalen damwanden. Kernmarkt voor Mobilis. Altijd aanwezig op kade-gerelateerde tenders.</div></div>
+    <div class="chip intl-flag" data-tier="A" data-company="Jan De Nul" data-intl="1"><span class="chip-tier ta">A</span>Jan De Nul (NL)<span class="fn">³</span><div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Belgische maritieme aannemer. Directe rivaal Boskalis/Van Oord/DEME. Structureel aanwezig op grote NL havenprojecten. Zie voetnoot 3.</div></div>
+    <div class="chip" data-tier="A" data-company="Ballast Nedam"><span class="chip-tier ta">A</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterke civiele en maritieme referenties. Neemt marktaandeel in complexe havenprojecten onder BESIX-vlag.</div></div>
+    <div class="chip" data-tier="A" data-company="Hakkers"><span class="chip-tier ta">A</span>Hakkers<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kade- en oeverspecialist; directe rivaal van TBI Mobilis. Sterk in damwanden, funderingen en kademuurconstructies. Jarenlange trackrecord in havengebonden kadewerk bij Rotterdam, Amsterdam, NSP, Moerdijk en Den Helder.</div></div>
+    <div class="chip" data-tier="B" data-company="VolkerWessels"><span class="chip-tier tb">B</span>VolkerWessels (VSF)<span class="fn">⁴</span><div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Via Volker Staal en Funderingen actief in staalconstructies en damwanden voor kades. Zie voetnoot 4.</div></div>
+    <div class="chip" data-tier="B" data-company="Besix Nederland"><span class="chip-tier tb">B</span>Besix Nederland<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Neemt deel aan complexe civiele en maritieme aanbestedingen. Groeiende positie naast Ballast Nedam.</div></div>
+    <div class="chip" data-tier="B" data-company="Van den Herik"><span class="chip-tier tb">B</span>Van den Herik<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Civiele aannemer gespecialiseerd in waterbouw, baggerwerk en havenconstructie. Sterk aanwezig in Zeeland (NSP) en Rotterdam. Regelmatige concurrent op kade- en oeverprojecten.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="B" data-company="Aarsleff"><span class="chip-tier tb">B</span>Aarsleff<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Deens-Nederlandse kade- en funderingsspecialist. Sterk in prefab betonpalen en damwanden. Groeiende NL-activiteit bij kadeprojecten Rotterdam, Amsterdam en NSP. Europese speler met toenemende marktpositie.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Hochtief" data-intl="1"><span class="chip-tier tc">C</span>Hochtief (via VINCI)<span class="fn">¹</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Op grote internationale havenprojecten in consortium. Beperkte zelfstandige aanwezigheid Rotterdam.</div></div>
+    <div class="chip" data-tier="C" data-company="Gebr. De Klerk"><span class="chip-tier tc">C</span>Gebr. De Klerk<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Waterbouwspecialist actief op kademuren en oeverconstructies. Aanwezig bij Rotterdam en NSP op kleinere en middelgrote kadeprojecten.</div></div>
+    <div class="chip" data-tier="C" data-company="Franki Grondtechnieken"><span class="chip-tier tc">C</span>Franki Grondtechnieken<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Funderingsspecialist actief op kade-funderingen en grondverbetering. Aanwezig bij havenprojecten Rotterdam en Amsterdam. Niche maar relevant op funderingscomponent van kadeprojecten.</div></div>
+  </div></td>
+  <td data-pmc="pmc04"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="Technip Energies" data-intl="1"><span class="chip-tier ta">A</span>Technip Energies<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Frans-NL concern; marktleider LNG, CO₂-opslag en procesindustrie. Sterk aanwezig op Porthos en andere CO₂-projecten Rotterdam.</div></div>
+    <div class="chip" data-tier="A" data-company="Boskalis"><span class="chip-tier ta">A</span>Boskalis (offshore/CO₂)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief als contractor op offshore pipeline- en CO₂-opslagprojecten. Rol in aanleg zeepijpleidingen Porthos.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="A" data-company="Visser & Smit Hanab"><span class="chip-tier ta">A</span>Visser & Smit Hanab<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Specialist in aanleg van pijpleidingen, kabels en energie-infra. Onderdeel van DEME Group (zie voetnoot 9). Directe concurrent op pipeline- en energie-infratenders Rotterdam, Groningen en NSP. Sterk op PMC04 (CO2-pijpleidingen) en PMC09 (energie-kabelinfra).</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Petrofac" data-intl="1"><span class="chip-tier tb">B</span>Petrofac<span class="fn">⁵</span><div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Was sterker; nu Tier B door financiële herstructurering 2023-2024. Zie voetnoot 5.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Bilfinger" data-intl="1"><span class="chip-tier tb">B</span>Bilfinger (procestech.)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Sterk in engineering en constructie procesinstallaties. Actief op modulaire bouw en revamps Rotterdam.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Specialist procesinstallaties en industriële projecten. Actief Rotterdam op nieuwbouw én onderhoud.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="B" data-company="Engie Fabricom"><span class="chip-tier tb">B</span>Engie Fabricom<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Belgische industriebouwer onderdeel van Engie-groep. Sterk in industriebouw en montage bij chemie- en energiebedrijven. Actief bij NSP (Dow, Yara) en Rotterdam. Uitvoerende aannemer, geen pure engineer.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Ferrovial" data-intl="1"><span class="chip-tier tc">C</span>Ferrovial Construction NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Beperkte aanwezigheid procesinstallaties NL. Doet mee op grote integrale tenders.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Hochtief" data-intl="1"><span class="chip-tier tc">C</span>Hochtief (via VINCI)<span class="fn">¹</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Selectieve grote industriebouw-tenders. Geen structurele NL-aanwezigheid procesindustrie.</div></div>
+  </div></td>
+  <td data-pmc="pmc09"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Energie & Water<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Grootste concurrent energietransitie-infra. Actief op BESS, walstroom, substations én laadinfra in havens. Wint structureel vergelijkbare opdrachten bij Portbedrijf Rotterdam.</div></div>
+    <div class="chip" data-tier="A" data-company="SPIE"><span class="chip-tier ta">A</span>SPIE Nederland<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Frans-NL technisch dienstverlener; sterk in E&I voor havens. Actief op walstroominstallaties, BESS en substations. Breed aanwezig Rotterdamse haven.</div></div>
+    <div class="chip" data-tier="A" data-company="Heijmans"><span class="chip-tier ta">A</span>Heijmans Infra (energie)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Groeiende positie energietransitie. Combineert civiel met energie; sterke propositie voor geïntegreerde projecten.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="A" data-company="Visser & Smit Hanab"><span class="chip-tier ta">A</span>Visser & Smit Hanab<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Specialist in aanleg van pijpleidingen, kabels en energie-infra. Onderdeel van DEME Group (zie voetnoot 9). Directe concurrent op pipeline- en energie-infratenders Rotterdam, Groningen en NSP. Sterk op PMC04 (CO2-pijpleidingen) en PMC09 (energie-kabelinfra).</div></div>
+    <div class="chip" data-tier="B" data-company="Equans"><span class="chip-tier tb">B</span>Equans (Engie Services)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Grote installatie- en energiedienstverlener. Actief op BESS en E&I-projecten. Sterk op technische uitvoering.</div></div>
+    <div class="chip" data-tier="B" data-company="VolkerWessels"><span class="chip-tier tb">B</span>VolkerWessels Hoogspanning<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Gespecialiseerd in hoogspanning en substation-constructie. Actief in havengebied op netwerkverzwaring.</div></div>
+    <div class="chip" data-tier="B" data-company="Strukton"><span class="chip-tier tb">B</span>Strukton (E&I-divisie)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Elektrotechniek en installaties. Neemt deel aan BESS en walstroom-tenders als E&I-aannemer.</div></div>
+    <div class="chip" data-tier="C" data-company="Croonwolter&dros"><span class="chip-tier tc">C</span>Croonwolter&dros (TBI)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>TBI-groep installatiebedrijf. Actief op E&I-component havenenergie-projecten. Meer onderaannemer dan hoofdaannemer.</div></div>
+    <div class="chip" data-tier="C" data-company="Engie Axima (E&I)"><span class="chip-tier tc">C</span>Engie Axima (E&I)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Naast PMC11 cleanroom-specialisme ook actief op technische E&I-installaties voor energieprojecten. Relevant op PMC09 waar HVAC en procesinstallaties overlappen met energie-infra.</div></div>
+    <div class="chip intl-flag" data-tier="D" data-company="Siemens Energy" data-intl="1"><span class="chip-tier td">D</span>Siemens Energy NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Substation-specialist op package-deal niveau. Concurreert op turnkey substation-projecten.</div></div>
+    <div class="chip intl-flag" data-tier="D" data-company="Schneider Electric" data-intl="1"><span class="chip-tier td">D</span>Schneider Electric NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Actief als turnkey leverancier/aannemer op substations en BESS-systemen. Neemt rol als hoofdaannemer op energieprojecten.</div></div>
+  </div></td>
+  <td data-pmc="pmc10"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Heijmans"><span class="chip-tier ta">A</span>Heijmans (Defensie team)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Dedicated Defensie-team; actief op marinegerelateerde infra en militaire utiliteitsbouw. Grootste directe concurrent DV op Defensie-tenders.</div></div>
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Breed portfolio in utiliteitsbouw voor Rijksoverheid en Defensie. Sterk in D&C-aanpak voor militaire facilitaire bouw.</div></div>
+    <div class="chip" data-tier="B" data-company="Ballast Nedam"><span class="chip-tier tb">B</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op civiele Defensie-infra (havens, kades voor marineschepen). Sterk in combinatie civiel + utiliteit.</div></div>
+    <div class="chip" data-tier="B" data-company="VolkerWessels"><span class="chip-tier tb">B</span>VolkerWessels<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief via meerdere dochters op Defensie-gerelateerde infra. Relevant op grote integrale opdrachten.</div></div>
+    <div class="chip" data-tier="B" data-company="DLV Project"><span class="chip-tier tb">B</span>DLV Project<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Specialist in beveiligde facilitaire bouw voor Defensie en justitie. Actief op marinebases en militaire installaties. Aanwezig bij Den Helder, NSP en Rotterdam op PMC10-tenders.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Hochtief" data-intl="1"><span class="chip-tier tc">C</span>Hochtief (via VINCI)<span class="fn">¹</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Actief op grote internationale Defensie-projecten. Beperkte NL-specifieke Defensie-footprint.</div></div>
+  </div></td>
+  <td data-pmc="pmc11"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Heembouw"><span class="chip-tier ta">A</span>Heembouw<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Specialist in complexe utiliteitsbouw inclusief cleanrooms en pharma-faciliteiten. Meest directe concurrent DV in dit segment.</div></div>
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Breed portfolio; actief op pharma en life sciences bouw. Sterk in geïntegreerde D&C voor complexe technische gebouwen.</div></div>
+    <div class="chip" data-tier="B" data-company="Breijer"><span class="chip-tier tb">B</span>Breijer Bouw & Installatie<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Gespecialiseerd in technisch complexe utiliteitsbouw, cleanrooms en laboratoriumfaciliteiten.</div></div>
+    <div class="chip" data-tier="B" data-company="Kuijpers"><span class="chip-tier tb">B</span>Kuijpers (TBI)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Installatiebedrijf met sterke positie in pharma en life sciences. Relevant op technisch-installatieve component.</div></div>
+    <div class="chip" data-tier="B" data-company="Engie Axima"><span class="chip-tier tb">B</span>Engie Axima NL<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Specialist technische installaties voor cleanrooms en pharma. Actief op HVAC, luchtbehandeling en proceskoeling.</div></div>
+    <div class="chip" data-tier="B" data-company="G&S Bouw"><span class="chip-tier tb">B</span>G&S Bouw<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Cleanroom en life sciences bouwspecialist. Actief op pharma-productiefaciliteiten en laboratoriumgebouwen. Aanwezig bij Rotterdam, Amsterdam en Brabant. Directe concurrent naast Heembouw in het pharma-segment.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Implenia" data-intl="1"><span class="chip-tier tc">C</span>Implenia Nederland<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Zwitserse aannemer met NL-activiteit. Occasioneel actief op pharma-bouw; geen structurele NL-marktpositie.</div></div>
+    <div class="chip" data-tier="C" data-company="Van Wijnen (utiliteit)"><span class="chip-tier tc">C</span>Van Wijnen (utiliteit)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Naast PMC03 ook actief in utiliteitsbouw waaronder life sciences faciliteiten. Incidenteel aanwezig op pharma-gerelateerde bouwprojecten in Rotterdam, Amsterdam en Brabant.</div></div>
+  </div></td>
+</tr>
+
+<!-- ═══ PORT OF AMSTERDAM ═══ -->
+<tr data-haven="amsterdam" data-intensity="22">
+  <td class="port-name">Port of Amsterdam<span class="port-region">NZKG – Noord-Holland</span></td>
+  <td data-pmc="pmc01"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra Nederland<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Dominant in civiele haveninfra Amsterdam. Vaste raamcontracten bij Havenbedrijf Amsterdam. Breed portfolio van wegenbouw tot kademuren.</div></div>
+    <div class="chip" data-tier="A" data-company="VolkerWessels"><span class="chip-tier ta">A</span>VolkerWessels<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Groot marktaandeel Amsterdamse haveninfra. Actief op terreinen, wegen en civiele constructies. Sterke lokale aanwezigheid NZKG.</div></div>
+    <div class="chip" data-tier="A" data-company="Strukton"><span class="chip-tier ta">A</span>Strukton Wegen<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk in wegenbouw en havenverhardingen Amsterdam. Vaste aanwezigheid op asfalt- en terreintenders havengebied.</div></div>
+    <div class="chip" data-tier="A" data-company="Ballast Nedam"><span class="chip-tier ta">A</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Complexe civiele projecten Amsterdam-havengebied (o.a. sluizen, kademuren IJmuiden). Sterke D&C-positie.</div></div>
+    <div class="chip" data-tier="A" data-company="KWS Infra (VolkerWessels)"><span class="chip-tier ta">A</span>KWS Infra (VolkerWessels)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>VolkerWessels-dochter gespecialiseerd in wegenbouw, asfalt en havenverhardingen. Apart vermeld naast VolkerWessels-paraplu omdat KWS op PMC01 direct concurreert met DV H&I op asfalt en terreinverharding. Zie voetnoot 8.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief in Amsterdam-regio op infra en terreinen. Regelmatig aanwezig op tenders.</div></div>
+    <div class="chip" data-tier="B" data-company="Besix Nederland"><span class="chip-tier tb">B</span>Besix Nederland<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op complexe civiele projecten Amsterdam-regio. Referentie: grote sluisprojecten. Groeiende marktpositie.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Ferrovial" data-intl="1"><span class="chip-tier tc">C</span>Ferrovial Construction NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Selectieve deelname aan grote civiele tenders. Geen structurele havengerichte aanwezigheid Amsterdam.</div></div>
+  </div></td>
+  <td data-pmc="pmc02"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="Bilfinger" data-intl="1"><span class="chip-tier ta">A</span>Bilfinger Tebodin<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief op tankterminals Amsterdam (o.a. Oiltanking, Vopak Amsterdam). Dezelfde dominantie als Rotterdam.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="CB&I McDermott" data-intl="1"><span class="chip-tier tb">B</span>CB&I / McDermott<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op tankopslagprojecten Amsterdam. Minder frequent dan Rotterdam maar aanwezig op grote projecten.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Onderhouds- en nieuwbouwprojecten bij tankterminals Amsterdam. Vaste relaties met tankopslagbedrijven NZKG.</div></div>
+  </div></td>
+  <td data-pmc="pmc03"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra / BAM Civiel<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Meerdere kademuurprojecten Amsterdam. Dominant op havenconstructie-tenders. Sterk in combinatie civiel + maritiem.</div></div>
+    <div class="chip" data-tier="A" data-company="Boskalis"><span class="chip-tier ta">A</span>Boskalis Nederland<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief op bagger- en kadeconstructie Amsterdam. Groot aandeel in havenverdiepingen en -uitbreidingen NZKG.</div></div>
+    <div class="chip" data-tier="A" data-company="Van Oord"><span class="chip-tier ta">A</span>Van Oord<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Maritieme infra Amsterdam-haven. Actief op havenconstructie en oeverwerken. Sterk in combinatie baggeren + civiel.</div></div>
+    <div class="chip" data-tier="A" data-company="TBI Mobilis"><span class="chip-tier ta">A</span>TBI Mobilis<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kade- en oeverspecialist; sterk aanwezig op damwand- en kadetenders Amsterdam-haven.</div></div>
+    <div class="chip" data-tier="A" data-company="Hakkers"><span class="chip-tier ta">A</span>Hakkers<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kade- en oeverspecialist; directe rivaal van TBI Mobilis. Sterk in damwanden, funderingen en kademuurconstructies. Jarenlange trackrecord in havengebonden kadewerk bij Rotterdam, Amsterdam, NSP, Moerdijk en Den Helder.</div></div>
+    <div class="chip" data-tier="B" data-company="Ballast Nedam"><span class="chip-tier tb">B</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op grotere havenconstructies Amsterdam. Minder frequent dan Rotterdam maar aanwezig op complexe tenders.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="DEME" data-intl="1"><span class="chip-tier tb">B</span>DEME<span class="fn">²</span><div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Minder dominant dan Rotterdam maar actief op maritieme constructieprojecten Amsterdam-haven. Zie voetnoot 2.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Jan De Nul" data-intl="1"><span class="chip-tier tb">B</span>Jan De Nul (NL)<span class="fn">³</span><div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief maar minder frequent dan Rotterdam. Doet mee op grotere bagger- en kadeprojecten Amsterdam. Zie voetnoot 3.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="B" data-company="Aarsleff"><span class="chip-tier tb">B</span>Aarsleff<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Deens-Nederlandse kade- en funderingsspecialist. Sterk in prefab betonpalen en damwanden. Groeiende NL-activiteit bij kadeprojecten Rotterdam, Amsterdam en NSP. Europese speler met toenemende marktpositie.</div></div>
+    <div class="chip" data-tier="C" data-company="Franki Grondtechnieken"><span class="chip-tier tc">C</span>Franki Grondtechnieken<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Funderingsspecialist actief op kade-funderingen en grondverbetering. Aanwezig bij havenprojecten Rotterdam en Amsterdam. Niche maar relevant op funderingscomponent van kadeprojecten.</div></div>
+  </div></td>
+  <td data-pmc="pmc04"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="Tata Projects" data-intl="1"><span class="chip-tier ta">A</span>Tata Projects<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief bij Tata Steel IJmuiden op grote industriële bouwprojecten. Sterke positie als preferred contractor bij staalindustrie NZKG.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Technip Energies" data-intl="1"><span class="chip-tier tb">B</span>Technip Energies<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op energietransitie-gerelateerde industriebouw Amsterdam-regio.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Bilfinger" data-intl="1"><span class="chip-tier tb">B</span>Bilfinger (procestech.)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Engineering en constructie procesinstallaties Amsterdam-haven. Regelmatig aanwezig.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Industriële projecten en procesinstallaties Amsterdam-regio. Actief bij chemische en energie-industrie NZKG.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Hochtief" data-intl="1"><span class="chip-tier tc">C</span>Hochtief (via VINCI)<span class="fn">¹</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Incidentele deelname grote industriebouw-tenders Amsterdam. Geen structurele aanwezigheid. Zie voetnoot 1.</div></div>
+  </div></td>
+  <td data-pmc="pmc09"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="SPIE"><span class="chip-tier ta">A</span>SPIE Nederland<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk in E&I voor havenenergie. Actief op walstroom en substation-projecten Amsterdam.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Energie & Water<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op BESS en energietransitie-projecten Amsterdam. Minder dominant dan Rotterdam maar relevant.</div></div>
+    <div class="chip" data-tier="B" data-company="Equans"><span class="chip-tier tb">B</span>Equans<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>E&I-dienstverlener actief in NZKG. Relevant op technische uitvoering energie-infra projecten.</div></div>
+    <div class="chip" data-tier="B" data-company="VolkerWessels"><span class="chip-tier tb">B</span>VolkerWessels Hoogspanning<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Substation en hoogspanning Amsterdam-regio. Actief op netwerkverzwaring havengebonden industrie.</div></div>
+    <div class="chip" data-tier="C" data-company="Engie Axima (E&I)"><span class="chip-tier tc">C</span>Engie Axima (E&I)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Naast PMC11 cleanroom-specialisme ook actief op technische E&I-installaties voor energieprojecten. Relevant op PMC09 waar HVAC en procesinstallaties overlappen met energie-infra.</div></div>
+    <div class="chip intl-flag" data-tier="D" data-company="Siemens Energy" data-intl="1"><span class="chip-tier td">D</span>Siemens Energy NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Turnkey substation-leverancier. Relevant op grote substation-tenders havengebied Amsterdam.</div></div>
+  </div></td>
+  <td data-pmc="pmc10"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Heijmans"><span class="chip-tier ta">A</span>Heijmans<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief op Defensie-infra Noord-Holland regio. Sterke positie op marinegerelateerde utiliteits- en infrabouw.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Aanwezig op Defensie-utiliteitsbouw Amsterdam-regio. Relevant op grote utiliteitsopdrachten.</div></div>
+    <div class="chip" data-tier="B" data-company="Ballast Nedam"><span class="chip-tier tb">B</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Civiele Defensie-infra Noord-Holland. Actief op marinegerelateerde kade- en havenprojecten.</div></div>
+  </div></td>
+  <td data-pmc="pmc11"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Heembouw"><span class="chip-tier ta">A</span>Heembouw<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Marktleider pharma-bouw. Actief in Amsterdam-regio op life science campus-projecten.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op pharma en lab-faciliteiten Amsterdam-regio. Breed portfolio; relevant op integrale D&C tenders.</div></div>
+    <div class="chip" data-tier="B" data-company="Kuijpers"><span class="chip-tier tb">B</span>Kuijpers (TBI)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Sterk op installatief deel pharma-bouw. Relevant als hoofdaannemer op technisch complexe farmagebouwen.</div></div>
+    <div class="chip" data-tier="B" data-company="Engie Axima"><span class="chip-tier tb">B</span>Engie Axima NL<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Cleanroom en proceskoeling specialist. Actief bij farmabedrijven Amsterdam-regio.</div></div>
+    <div class="chip" data-tier="B" data-company="G&S Bouw"><span class="chip-tier tb">B</span>G&S Bouw<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Cleanroom en life sciences bouwspecialist. Actief op pharma-productiefaciliteiten en laboratoriumgebouwen. Aanwezig bij Rotterdam, Amsterdam en Brabant. Directe concurrent naast Heembouw in het pharma-segment.</div></div>
+    <div class="chip" data-tier="C" data-company="Van Wijnen (utiliteit)"><span class="chip-tier tc">C</span>Van Wijnen (utiliteit)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Naast PMC03 ook actief in utiliteitsbouw waaronder life sciences faciliteiten. Incidenteel aanwezig op pharma-gerelateerde bouwprojecten in Rotterdam, Amsterdam en Brabant.</div></div>
+  </div></td>
+</tr>
+
+<!-- ═══ GRONINGEN SEAPORTS ═══ -->
+<tr data-haven="groningen" data-intensity="14">
+  <td class="port-name">Groningen Seaports<span class="port-region">Delfzijl & Eemshaven</span></td>
+  <td data-pmc="pmc01"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Strukton"><span class="chip-tier ta">A</span>Strukton Wegen<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterkste concurrent PMC01 Groningen. Sterke regionale positie wegenbouw Noord-Nederland.</div></div>
+    <div class="chip" data-tier="A" data-company="KWS Infra (VolkerWessels)"><span class="chip-tier ta">A</span>KWS Infra (VolkerWessels)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>VolkerWessels-dochter gespecialiseerd in wegenbouw, asfalt en havenverhardingen. Apart vermeld naast VolkerWessels-paraplu omdat KWS op PMC01 direct concurreert met DV H&I op asfalt en terreinverharding. Zie voetnoot 8.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Aanwezig op grotere civiele havenprojecten Groningen. Relevant op middelgrote tenders.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief in Noord-Nederland op infra. Regelmatige deelname aan tenders Groningen Seaports.</div></div>
+    <div class="chip" data-tier="B" data-company="Van Gelder"><span class="chip-tier tb">B</span>Van Gelder Groep<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Grondverzet en civiele werken. Actief in Groningen-regio op havengebonden terreinen.</div></div>
+    <div class="chip" data-tier="C" data-company="Schipper Groep"><span class="chip-tier tc">C</span>Schipper Groep<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Regionaal civiel bedrijf Groningen. Actief op kleinere haveninfra-projecten. Lokale kennis maar beperkt volume.</div></div>
+    <div class="chip" data-tier="C" data-company="Martens en Van Oord Groep"><span class="chip-tier tc">C</span>Martens en Van Oord Groep<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Grondverzetspecialist en milieubedrijf (niet gerelateerd aan Van Oord maritiem). Actief op havengebonden grondverzet, sloopwerk en milieusanering in Rotterdam, Groningen en Moerdijk.</div></div>
+    <div class="chip" data-tier="D" data-company="Dusseldorp"><span class="chip-tier td">D</span>Dusseldorp Infra & Milieu<div class="tooltip"><div class="tooltip-tier td">Tier D — Potentiële concurrent</div>Oost-Nederland grondverzetspecialist met groeiende footprint richting Groningen. Monitoren.</div></div>
+  </div></td>
+  <td data-pmc="pmc02"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="Bilfinger" data-intl="1"><span class="chip-tier ta">A</span>Bilfinger Tebodin<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Dominant tankterminal-engineering NL. Actief bij chemie-cluster Delfzijl (o.a. Nouryon, Dow). Sterke lokale kennis.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Industrieel onderhoud en nieuwbouw chemiecluster Delfzijl. Vaste relaties bij Nouryon en andere chemische bedrijven.</div></div>
+  </div></td>
+  <td data-pmc="pmc03"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Boskalis"><span class="chip-tier ta">A</span>Boskalis Nederland<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief op baggerwerk en kadeconstructie Eemshaven. Dominante maritieme positie Noord-Nederland.</div></div>
+    <div class="chip" data-tier="A" data-company="Van Oord"><span class="chip-tier ta">A</span>Van Oord<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Maritieme infra Eemshaven. Actief op havenconstructie en oeverwerken.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Civiele havenconstructie Groningen. Aanwezig op kade- en terreintenders.</div></div>
+    <div class="chip" data-tier="B" data-company="TBI Mobilis"><span class="chip-tier tb">B</span>TBI Mobilis<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Kade- en damwandspecialist actief in Eemshaven. Relevant op oeverbeschermings- en kadeprojecten.</div></div>
+    <div class="chip" data-tier="B" data-company="Van den Herik"><span class="chip-tier tb">B</span>Van den Herik<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Civiele aannemer gespecialiseerd in waterbouw, baggerwerk en havenconstructie. Sterk aanwezig in Zeeland (NSP) en Rotterdam. Regelmatige concurrent op kade- en oeverprojecten.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Jan De Nul" data-intl="1"><span class="chip-tier tc">C</span>Jan De Nul (NL)<span class="fn">³</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Actief op grotere baggerprojecten Noord-Nederland maar minder frequent dan grote zeehavens. Zie voetnoot 3.</div></div>
+  </div></td>
+  <td data-pmc="pmc04"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="Technip Energies" data-intl="1"><span class="chip-tier ta">A</span>Technip Energies<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk aanwezig op LNG-infrastructuur en energie-transitie Eemshaven (o.a. Gate terminal, waterstofprojecten).</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="A" data-company="Visser & Smit Hanab"><span class="chip-tier ta">A</span>Visser & Smit Hanab<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Specialist in aanleg van pijpleidingen, kabels en energie-infra. Onderdeel van DEME Group (zie voetnoot 9). Directe concurrent op pipeline- en energie-infratenders Rotterdam, Groningen en NSP. Sterk op PMC04 (CO2-pijpleidingen) en PMC09 (energie-kabelinfra).</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Bilfinger" data-intl="1"><span class="chip-tier tb">B</span>Bilfinger<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Procesinstallaties bij chemiecluster Delfzijl. Actief op industrieel bouwwerk en engineering voor chemische industrie.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Petrofac" data-intl="1"><span class="chip-tier tb">B</span>Petrofac<span class="fn">⁵</span><div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op offshore en energie-gerelateerde industriebouw Eemshaven. Positie verzwakt door herstructurering. Zie voetnoot 5.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Industriële projecten chemiecluster en energiesector Groningen. Actief bij Nouryon en energiebedrijven Eemshaven.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="B" data-company="Engie Fabricom"><span class="chip-tier tb">B</span>Engie Fabricom<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Belgische industriebouwer onderdeel van Engie-groep. Sterk in industriebouw en montage bij chemie- en energiebedrijven. Actief bij NSP (Dow, Yara) en Rotterdam. Uitvoerende aannemer, geen pure engineer.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Hochtief" data-intl="1"><span class="chip-tier tc">C</span>Hochtief (via VINCI)<span class="fn">¹</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Selectieve deelname grote industriebouwtenders Noord-Nederland. Zie voetnoot 1.</div></div>
+  </div></td>
+  <td data-pmc="pmc09"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Equans"><span class="chip-tier ta">A</span>ENGIE / Equans<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk in energie-infra Eemshaven (windpark-aansluitingen, substation). Actief op grote energietransitie-projecten Noord-Nederland.</div></div>
+    <div class="chip" data-tier="A" data-company="SPIE"><span class="chip-tier ta">A</span>SPIE Nederland<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>E&I voor energieprojecten Eemshaven. Actief op substation en elektrotechnische infrastructuur voor havens en industrie.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="A" data-company="Visser & Smit Hanab"><span class="chip-tier ta">A</span>Visser & Smit Hanab<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Specialist in aanleg van pijpleidingen, kabels en energie-infra. Onderdeel van DEME Group (zie voetnoot 9). Directe concurrent op pipeline- en energie-infratenders Rotterdam, Groningen en NSP. Sterk op PMC04 (CO2-pijpleidingen) en PMC09 (energie-kabelinfra).</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Energie & Water<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Energietransitie-infra Noord-Nederland. Actief op BESS en substation-projecten havengebied.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans (energie)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Groeiende positie op energie-infra Groningen. Combineert civiel en energie op integrale projecten.</div></div>
+    <div class="chip" data-tier="B" data-company="Strukton"><span class="chip-tier tb">B</span>Strukton (E&I-divisie)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Elektrotechniek en instrumentatie voor energie-projecten. Actief als E&I-aannemer op complexe energieprojecten Eemshaven.</div></div>
+  </div></td>
+  <td data-pmc="pmc10"><div class="competitors">
+    <div class="chip" data-tier="C" data-company="BAM Infra"><span class="chip-tier tc">C</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Beperkte Defensie-activiteit in Groningen-regio. Incidenteel op facilitaire Defensie-bouw.</div></div>
+    <div class="chip" data-tier="C" data-company="Heijmans"><span class="chip-tier tc">C</span>Heijmans<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Defensie-team actief maar beperkt specifiek in Groningen. Incidentele aanwezigheid op Defensie-tenders Noord-Nederland.</div></div>
+  </div></td>
+  <td data-pmc="pmc11"><div class="competitors">
+    <div class="chip" data-tier="C" data-company="Heembouw"><span class="chip-tier tc">C</span>Heembouw<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Pharma-bouwspecialist; beperkte aanwezigheid Groningen. Incidenteel op grotere life science-projecten.</div></div>
+    <div class="chip" data-tier="C" data-company="Nijhuis Bouw"><span class="chip-tier tc">C</span>Nijhuis Bouw<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Regionaal bouwbedrijf Noord-Nederland. Actief op utiliteitsbouw inclusief kleinere life science-faciliteiten.</div></div>
+  </div></td>
+</tr>
+
+<!-- ═══ NORTH SEA PORT ═══ -->
+<tr data-haven="northsea" data-intensity="21">
+  <td class="port-name">North Sea Port<span class="port-region">Terneuzen · Vlissingen · Zeebrugge</span></td>
+  <td data-pmc="pmc01"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="VolkerWessels"><span class="chip-tier ta">A</span>VolkerWessels (VolkerInfra)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk in Zeeland op haveninfra. Meerdere grote referenties in Terneuzen en Vlissingen. Vaste marktpositie.</div></div>
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Brede aanwezigheid op civiele haveninfra North Sea Port. Actief op terreinen, wegen en constructies in het grensoverschrijdende havengebied.</div></div>
+    <div class="chip" data-tier="A" data-company="Ballast Nedam"><span class="chip-tier ta">A</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk in Zeeland en Noord-België op complexe civiele projecten. Referentie: havenuitbreidingen Terneuzen/Zeebrugge.</div></div>
+    <div class="chip" data-tier="A" data-company="KWS Infra (VolkerWessels)"><span class="chip-tier ta">A</span>KWS Infra (VolkerWessels)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>VolkerWessels-dochter gespecialiseerd in wegenbouw, asfalt en havenverhardingen. Apart vermeld naast VolkerWessels-paraplu omdat KWS op PMC01 direct concurreert met DV H&I op asfalt en terreinverharding. Zie voetnoot 8.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op haveninfra Zeeland. Regelmatige aanwezigheid op tenders maar minder dominant dan VolkerWessels/BAM.</div></div>
+    <div class="chip" data-tier="B" data-company="Besix Nederland"><span class="chip-tier tb">B</span>Besix Nederland<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Belgisch-NL speler; sterke positie in grensoverschrijdend havengebied (ook Zeebrugge-zijde).</div></div>
+    <div class="chip" data-tier="C" data-company="TM Groep"><span class="chip-tier tc">C</span>TM Groep<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Regionaal civiel bedrijf Zeeland. Actief op kleinere haveninfra-projecten.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Ferrovial" data-intl="1"><span class="chip-tier tc">C</span>Ferrovial Construction NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Incidentele deelname aan grotere civiele tenders Zeeland.</div></div>
+  </div></td>
+  <td data-pmc="pmc02"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="Bilfinger" data-intl="1"><span class="chip-tier ta">A</span>Bilfinger<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Dominant op tankterminal-projecten North Sea Port (o.a. OVET, Vopak Vlissingen).</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="CB&I McDermott" data-intl="1"><span class="chip-tier tb">B</span>CB&I / McDermott<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op grotere tankopslagprojecten NSP. Minder frequent dan Bilfinger maar aanwezig op grote tenders.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Industrieel onderhoud en nieuwbouw. Actief bij chemische industrie Terneuzen (o.a. Dow). Vaste aanwezigheid.</div></div>
+  </div></td>
+  <td data-pmc="pmc03"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="DEME" data-intl="1"><span class="chip-tier ta">A</span>DEME<span class="fn">²</span><div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Home-markt voor DEME. Dominant op baggerwerk, kademuren en havenconstructie NSP. Zie voetnoot 2.</div></div>
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra / BAM Civiel<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kademuren en havenconstructie. Actief op grote civiele haventenders NSP.</div></div>
+    <div class="chip" data-tier="A" data-company="Boskalis"><span class="chip-tier ta">A</span>Boskalis<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Maritieme infra en baggerwerk North Sea Port. Sterk op havenverdiepingen en kadeprojecten Vlissingen/Terneuzen.</div></div>
+    <div class="chip" data-tier="A" data-company="TBI Mobilis"><span class="chip-tier ta">A</span>TBI Mobilis<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kade- en oeverspecialist actief bij NSP. Damwand en kadetenders zijn kernmarkt.</div></div>
+    <div class="chip intl-flag" data-tier="A" data-company="Jan De Nul" data-intl="1"><span class="chip-tier ta">A</span>Jan De Nul (NL)<span class="fn">³</span><div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Zeer actief in Belgisch-NL grensgebied. Sterk op baggerwerk en kadeconstructie Zeebrugge/Terneuzen-zijde. Zie voetnoot 3.</div></div>
+    <div class="chip" data-tier="A" data-company="Hakkers"><span class="chip-tier ta">A</span>Hakkers<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kade- en oeverspecialist; directe rivaal van TBI Mobilis. Sterk in damwanden, funderingen en kademuurconstructies. Jarenlange trackrecord in havengebonden kadewerk bij Rotterdam, Amsterdam, NSP, Moerdijk en Den Helder.</div></div>
+    <div class="chip" data-tier="B" data-company="VolkerWessels"><span class="chip-tier tb">B</span>VolkerWessels<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Via VSF en VolkerInfra actief op havenconstructie. Minder maritiem-gespecialiseerd dan DEME/Boskalis.</div></div>
+    <div class="chip" data-tier="B" data-company="Ballast Nedam"><span class="chip-tier tb">B</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Complexe civiele havenprojecten Zeeland. Actief op kades en havengebouwen in combinatie civiel+utiliteit.</div></div>
+    <div class="chip" data-tier="B" data-company="Van den Herik"><span class="chip-tier tb">B</span>Van den Herik<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Civiele aannemer gespecialiseerd in waterbouw, baggerwerk en havenconstructie. Sterk aanwezig in Zeeland (NSP) en Rotterdam. Regelmatige concurrent op kade- en oeverprojecten.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="B" data-company="Aarsleff"><span class="chip-tier tb">B</span>Aarsleff<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Deens-Nederlandse kade- en funderingsspecialist. Sterk in prefab betonpalen en damwanden. Groeiende NL-activiteit bij kadeprojecten Rotterdam, Amsterdam en NSP. Europese speler met toenemende marktpositie.</div></div>
+    <div class="chip" data-tier="C" data-company="Gebr. De Klerk"><span class="chip-tier tc">C</span>Gebr. De Klerk<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Waterbouwspecialist actief op kademuren en oeverconstructies. Aanwezig bij Rotterdam en NSP op kleinere en middelgrote kadeprojecten.</div></div>
+  </div></td>
+  <td data-pmc="pmc04"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="ArcelorMittal" data-intl="1"><span class="chip-tier ta">A</span>ArcelorMittal Projects<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Staalindustrie Gent/Zelzate; eigen projectorganisatie. Direct actief op industriebouwprojecten in het grensgebied NSP.</div></div>
+    <div class="chip intl-flag" data-tier="A" data-company="Technip Energies" data-intl="1"><span class="chip-tier ta">A</span>Technip Energies<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief op procesindustrie en energietransitie Zeeland (o.a. Dow Chemical, Yara). Sterk op EPCM voor grote industriële projecten.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="A" data-company="Visser & Smit Hanab"><span class="chip-tier ta">A</span>Visser & Smit Hanab<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Specialist in aanleg van pijpleidingen, kabels en energie-infra. Onderdeel van DEME Group (zie voetnoot 9). Directe concurrent op pipeline- en energie-infratenders Rotterdam, Groningen en NSP. Sterk op PMC04 (CO2-pijpleidingen) en PMC09 (energie-kabelinfra).</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Bilfinger" data-intl="1"><span class="chip-tier tb">B</span>Bilfinger<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Engineering en constructie procesinstallaties. Actief bij chemische industrie Terneuzen op onderhouds- en nieuwbouwprojecten.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Industriële projecten chemie-sector NSP. Vaste relaties bij Dow en andere chemische bedrijven Terneuzen.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="B" data-company="Engie Fabricom"><span class="chip-tier tb">B</span>Engie Fabricom<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Belgische industriebouwer onderdeel van Engie-groep. Sterk in industriebouw en montage bij chemie- en energiebedrijven. Actief bij NSP (Dow, Yara) en Rotterdam. Uitvoerende aannemer, geen pure engineer.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Petrofac" data-intl="1"><span class="chip-tier tc">C</span>Petrofac<span class="fn">⁵</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Actief op selectieve offshore/industrietenders NSP. Positie verzwakt door herstructurering 2023-2024. Zie voetnoot 5.</div></div>
+  </div></td>
+  <td data-pmc="pmc09"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Equans"><span class="chip-tier ta">A</span>Equans (ENGIE)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk op energie-infra Zeeland en Zeebrugge. Actief op substation en E&I voor havenenergie. Belgisch-NL aanwezigheid in grensgebied.</div></div>
+    <div class="chip intl-flag" data-intl="1" data-tier="A" data-company="Visser & Smit Hanab"><span class="chip-tier ta">A</span>Visser & Smit Hanab<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Specialist in aanleg van pijpleidingen, kabels en energie-infra. Onderdeel van DEME Group (zie voetnoot 9). Directe concurrent op pipeline- en energie-infratenders Rotterdam, Groningen en NSP. Sterk op PMC04 (CO2-pijpleidingen) en PMC09 (energie-kabelinfra).</div></div>
+    <div class="chip" data-tier="B" data-company="SPIE"><span class="chip-tier tb">B</span>SPIE Nederland<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>E&I voor energie-infra NSP. Actief maar minder dominant dan bij Rotterdam op walstroom en BESS-tenders.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Energie & Water<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Energietransitie-projecten Zeeland. Actief op substation en netwerkverzwaring havengebied.</div></div>
+    <div class="chip" data-tier="B" data-company="Strukton"><span class="chip-tier tb">B</span>Strukton (E&I-divisie)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Elektrotechniek en instrumentatie voor energie-projecten NSP. Relevant op BESS en walstroom-tenders.</div></div>
+  </div></td>
+  <td data-pmc="pmc10"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Ballast Nedam"><span class="chip-tier ta">A</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief op marinegerelateerde infra Vlissingen (Marinebasis Vlissingen). Sterk op civiele Defensie-infra Zeeland.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Utiliteitsbouw Defensie Zeeland. Actief op facilitaire bouw bij marinebasis.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Defensie-team actief in Zeeland. Combineert infra en utiliteit op militaire faciliteiten.</div></div>
+    <div class="chip" data-tier="B" data-company="DLV Project"><span class="chip-tier tb">B</span>DLV Project<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Specialist in beveiligde facilitaire bouw voor Defensie en justitie. Actief op marinebases en militaire installaties. Aanwezig bij Den Helder, NSP en Rotterdam op PMC10-tenders.</div></div>
+  </div></td>
+  <td data-pmc="pmc11"><div class="competitors">
+    <div class="chip" data-tier="C" data-company="Heembouw"><span class="chip-tier tc">C</span>Heembouw<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Pharma-bouwspecialist. Beperkte aanwezigheid in Zeeland; incidenteel op grotere life science projecten.</div></div>
+    <div class="chip" data-tier="C" data-company="BAM Infra"><span class="chip-tier tc">C</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Breed portfolio; incidenteel actief op pharma/utiliteit in Zeeland.</div></div>
+  </div></td>
+</tr>
+
+<!-- ═══ PORT OF MOERDIJK ═══ -->
+<tr data-haven="moerdijk" data-intensity="16">
+  <td class="port-name">Port of Moerdijk<span class="port-region">Noord-Brabant</span></td>
+  <td data-pmc="pmc01"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Van Gelder"><span class="chip-tier ta">A</span>Van Gelder Groep<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Thuismarkt Moerdijk. Meest lokaal verankerde civiele aannemer in Moerdijk-havengebied. Dominant op terreinen, wegen en grondverzet.</div></div>
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Brede aanwezigheid op civiele haveninfra Moerdijk. Actief op grotere haventerrein- en wegenprojecten.</div></div>
+    <div class="chip" data-tier="A" data-company="KWS Infra (VolkerWessels)"><span class="chip-tier ta">A</span>KWS Infra (VolkerWessels)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>VolkerWessels-dochter gespecialiseerd in wegenbouw, asfalt en havenverhardingen. Apart vermeld naast VolkerWessels-paraplu omdat KWS op PMC01 direct concurreert met DV H&I op asfalt en terreinverharding. Zie voetnoot 8.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief in Brabant op haveninfra Moerdijk. Regelmatige deelname maar minder lokaal verankerd dan Van Gelder.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Grondverzet en industriële terreinen. Actief op havengebonden civiele werken Moerdijk.</div></div>
+    <div class="chip" data-tier="B" data-company="Strukton"><span class="chip-tier tb">B</span>Strukton Wegen<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Wegenbouw en terreinfundering. Actief op havenverhardingen Moerdijk.</div></div>
+    <div class="chip" data-tier="B" data-company="De Vries & van de Wiel"><span class="chip-tier tb">B</span>De Vries & van de Wiel<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Zwaar grondverzetbedrijf actief op grote civiele projecten in havens en industrie. Actief in Rotterdam, Moerdijk en Brabant op havengebonden grondwerk en civiele constructies.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Ferrovial" data-intl="1"><span class="chip-tier tc">C</span>Ferrovial Construction NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Selectieve deelname grote civiele tenders Moerdijk. Geen structurele aanwezigheid.</div></div>
+    <div class="chip" data-tier="C" data-company="Martens en Van Oord Groep"><span class="chip-tier tc">C</span>Martens en Van Oord Groep<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Grondverzetspecialist en milieubedrijf (niet gerelateerd aan Van Oord maritiem). Actief op havengebonden grondverzet, sloopwerk en milieusanering in Rotterdam, Groningen en Moerdijk.</div></div>
+    <div class="chip" data-tier="C" data-company="Gebr. Van Kessel"><span class="chip-tier tc">C</span>Gebr. Van Kessel<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Grondverzetspecialist Brabant/Limburg. Actief op haventerreinen en civiele werken in Brabant en Moerdijk-regio. Regionaal verankerd met goede lokale kennis en relaties.</div></div>
+  </div></td>
+  <td data-pmc="pmc02"><div class="competitors">
+    <div class="chip intl-flag" data-tier="A" data-company="Bilfinger" data-intl="1"><span class="chip-tier ta">A</span>Bilfinger Tebodin<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief op tankterminal-projecten Moerdijk (o.a. VTTI Moerdijk). Dezelfde dominantie als andere havens.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Onderhouds- en nieuwbouwprojecten bij tankterminals Moerdijk. Vaste relaties met tankopslagbedrijven.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="CB&I McDermott" data-intl="1"><span class="chip-tier tc">C</span>CB&I / McDermott<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Actief op grotere tankopslagprojecten. Minder frequent dan Rotterdam maar aanwezig op specifieke grote tenders.</div></div>
+  </div></td>
+  <td data-pmc="pmc03"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra / BAM Civiel<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kademuren en havenconstructie Moerdijk. Actief op grote civiele haventenders. Vaste aanwezigheid.</div></div>
+    <div class="chip" data-tier="A" data-company="TBI Mobilis"><span class="chip-tier ta">A</span>TBI Mobilis<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kade- en oeverspecialist. Actief op damwand- en kadetenders Moerdijk.</div></div>
+    <div class="chip" data-tier="A" data-company="Hakkers"><span class="chip-tier ta">A</span>Hakkers<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kade- en oeverspecialist; directe rivaal van TBI Mobilis. Sterk in damwanden, funderingen en kademuurconstructies. Jarenlange trackrecord in havengebonden kadewerk bij Rotterdam, Amsterdam, NSP, Moerdijk en Den Helder.</div></div>
+    <div class="chip" data-tier="B" data-company="VolkerWessels"><span class="chip-tier tb">B</span>VolkerWessels<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Havenconstructie via VolkerInfra en VSF. Actief op integrale projecten.</div></div>
+    <div class="chip" data-tier="B" data-company="Boskalis"><span class="chip-tier tb">B</span>Boskalis<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Baggerwerk en kadeconstructie Moerdijk. Minder frequent dan grote zeehavens maar aanwezig op grotere projecten.</div></div>
+  </div></td>
+  <td data-pmc="pmc04"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Heijmans"><span class="chip-tier ta">A</span>Heijmans (industriebouw)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk in industriebouw Brabant. Meest directe concurrent DV H&I in industriebouw Moerdijk.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Bilfinger" data-intl="1"><span class="chip-tier tb">B</span>Bilfinger<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Procesinstallaties en engineering voor procesindustrie Moerdijk. Regelmatig aanwezig.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Technip Energies" data-intl="1"><span class="chip-tier tb">B</span>Technip Energies<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op energiegerelateerde industriebouw. Neemt deel aan projecten energietransitie industrie Moerdijk.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Industriële projecten voor procesindustrie. Actief bij chemische bedrijven haven Moerdijk.</div></div>
+  </div></td>
+  <td data-pmc="pmc09"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="SPIE"><span class="chip-tier ta">A</span>SPIE Nederland<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>E&I voor energie-infra Moerdijk. Sterk op walstroom en substation-projecten in de haven.</div></div>
+    <div class="chip" data-tier="B" data-company="Equans"><span class="chip-tier tb">B</span>Equans<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Technische dienstverlener actief op energie-infra Moerdijk. Regelmatige deelname aan E&I-tenders.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Energie & Water<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Energietransitie-infra Brabant. Actief op BESS en substation-projecten havengebied Moerdijk.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans (energie)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Combineert civiel en energie op integrale projecten Moerdijk. Groeiende positie energietransitie Brabant.</div></div>
+    <div class="chip" data-tier="C" data-company="Engie Axima (E&I)"><span class="chip-tier tc">C</span>Engie Axima (E&I)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Naast PMC11 cleanroom-specialisme ook actief op technische E&I-installaties voor energieprojecten. Relevant op PMC09 waar HVAC en procesinstallaties overlappen met energie-infra.</div></div>
+  </div></td>
+  <td data-pmc="pmc10"><div class="competitors">
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Defensie-gerelateerde infra en utiliteit. Actief op militaire faciliteiten in de Brabant-regio.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Utiliteitsbouw voor Defensie. Actief op facilitaire Defensie-projecten Brabant.</div></div>
+    <div class="chip" data-tier="C" data-company="Ballast Nedam"><span class="chip-tier tc">C</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Incidenteel op Defensie-civiele tenders. Geen vaste Defensie-aanwezigheid Moerdijk.</div></div>
+  </div></td>
+  <td data-pmc="pmc11"><div class="competitors">
+    <div class="chip" data-tier="B" data-company="Heembouw"><span class="chip-tier tb">B</span>Heembouw<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Pharma-bouwspecialist actief in Brabant-regio (sterk pharma-cluster). Relevant op grotere farma-projecten nabij Moerdijk-haven.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Pharma en life sciences bouw. Actief op integrale D&C tenders technische gebouwen Brabant.</div></div>
+    <div class="chip" data-tier="B" data-company="G&S Bouw"><span class="chip-tier tb">B</span>G&S Bouw<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Cleanroom en life sciences bouwspecialist. Actief op pharma-productiefaciliteiten en laboratoriumgebouwen. Aanwezig bij Rotterdam, Amsterdam en Brabant. Directe concurrent naast Heembouw in het pharma-segment.</div></div>
+    <div class="chip" data-tier="C" data-company="Breijer"><span class="chip-tier tc">C</span>Breijer Bouw & Installatie<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Technisch complexe utiliteitsbouw. Actief in Brabant op cleanroom en laboratoriumfaciliteiten.</div></div>
+    <div class="chip" data-tier="C" data-company="Engie Axima"><span class="chip-tier tc">C</span>Engie Axima NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Cleanroom-installaties voor farmabedrijven. Relevant op technisch-installatieve component pharma-projecten.</div></div>
+  </div></td>
+</tr>
+
+<!-- ═══ PORT OF ZWOLLE ═══ -->
+<tr data-haven="zwolle" data-intensity="7">
+  <td class="port-name">Port of Zwolle<span class="port-region">Overijssel (binnenvaart)</span></td>
+  <td data-pmc="pmc01"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Strukton"><span class="chip-tier ta">A</span>Strukton Wegen<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Dominant in haveninfra Oost-Nederland. Sterke positie in wegenbouw en terreinen Zwolle-regio. Vaste aanwezigheid op haveninfra-tenders.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Breed aanwezig op civiele haveninfra Zwolle. Regelmatige deelname op middelgrote tenders havengebied.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief in Overijssel op infra en terreinen. Neemt deel aan haveninfra-tenders Zwolle.</div></div>
+    <div class="chip" data-tier="C" data-company="Nijhuis Infra"><span class="chip-tier tc">C</span>Nijhuis Infra<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Regionaal civiel bedrijf Overijssel/Gelderland. Actief op kleinere haveninfra-projecten. Lokale kennis maar beperkte schaal.</div></div>
+    <div class="chip" data-tier="D" data-company="Dusseldorp"><span class="chip-tier td">D</span>Dusseldorp Infra & Milieu<div class="tooltip"><div class="tooltip-tier td">Tier D — Potentiële concurrent</div>Oost-Nederland grondverzetspecialist. Groeiende activiteiten richting havengebonden terreinen Zwolle. Monitoren.</div></div>
+  </div></td>
+  <td data-pmc="pmc02"><div class="competitors">
+    <div class="chip intl-flag" data-tier="C" data-company="Bilfinger" data-intl="1"><span class="chip-tier tc">C</span>Bilfinger Tebodin<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Beperkte aanwezigheid tankterminals Zwolle. Incidenteel op kleinere procesinstallatie-projecten in binnenvaarthaven.</div></div>
+    <div class="chip" data-tier="D" data-company="Mourik"><span class="chip-tier td">D</span>Mourik International<div class="tooltip"><div class="tooltip-tier td">Tier D — Potentiële concurrent</div>Beperkte aanwezigheid maar groeipotentie als Zwolle-haven verder industrialiseert. Monitoren.</div></div>
+  </div></td>
+  <td data-pmc="pmc03"><div class="competitors">
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Kademuren en havenconstructie Zwolle. Actief op kade-gerelateerde tenders binnenvaarthaven.</div></div>
+    <div class="chip" data-tier="B" data-company="TBI Mobilis"><span class="chip-tier tb">B</span>TBI Mobilis<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Kade- en oeverspecialist. Relevante concurrent op damwand- en kadetenders bij binnenvaarthaven Zwolle.</div></div>
+    <div class="chip" data-tier="C" data-company="Van Wijnen"><span class="chip-tier tc">C</span>Van Wijnen<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Bouwer met aanwezigheid in Oost-Nederland. Incidenteel op havenconstructie-gerelateerde tenders.</div></div>
+  </div></td>
+  <td data-pmc="pmc04"><div class="competitors">
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Industriebouw Oost-Nederland. Actief op middelgrote industriële bouwprojecten in Zwolle-regio.</div></div>
+    <div class="chip" data-tier="C" data-company="Kuijpers"><span class="chip-tier tc">C</span>TBI / Kuijpers<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Installatie en bouw op procesinstallaties. Incidenteel aanwezig op industriebouw in Overijssel.</div></div>
+  </div></td>
+  <td data-pmc="pmc09"><div class="competitors">
+    <div class="chip" data-tier="B" data-company="Enexis"><span class="chip-tier tb">B</span>Enexis (nettaken)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Netbeheerder Oost/Noord-Nederland. Actief op netwerkverzwaring en private aansluitingen havengebied Zwolle.</div></div>
+    <div class="chip" data-tier="C" data-company="SPIE"><span class="chip-tier tc">C</span>SPIE (regionaal)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Regionale E&I-activiteiten Oost-Nederland. Incidenteel op energie-infra tenders Zwolle-haven.</div></div>
+    <div class="chip" data-tier="C" data-company="Heijmans"><span class="chip-tier tc">C</span>Heijmans (energie)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Energie-infra in Overijssel. Relevantie neemt toe naarmate havenenergie-projecten groter worden.</div></div>
+    <div class="chip" data-tier="D" data-company="Regionale installateurs"><span class="chip-tier td">D</span>Regionale installateurs<div class="tooltip"><div class="tooltip-tier td">Tier D — Potentiële concurrent</div>Diverse regionale E&I-bedrijven Overijssel. Actief op kleinschalige energie-tenders. Beperkte schaal maar lokale concurrentie.</div></div>
+  </div></td>
+  <td data-pmc="pmc10"><div class="empty-cell">— Geen directe markt</div></td>
+  <td data-pmc="pmc11"><div class="competitors">
+    <div class="chip" data-tier="C" data-company="Heembouw"><span class="chip-tier tc">C</span>Heembouw<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Pharma-specialist; incidenteel actief in Oost-Nederland op life science-projecten.</div></div>
+    <div class="chip" data-tier="D" data-company="Regionaal utiliteitsbedrijf"><span class="chip-tier td">D</span>Regionaal utiliteitsbedrijf<div class="tooltip"><div class="tooltip-tier td">Tier D — Potentiële concurrent</div>Lokale utiliteitsbouwers Overijssel. Relevant op kleinere facilitaire projecten maar geen pharma-specialisatie.</div></div>
+  </div></td>
+</tr>
+
+<!-- ═══ PORT OF DEN HELDER ═══ -->
+<tr data-haven="denhelder" data-intensity="15">
+  <td class="port-name">Port of Den Helder<span class="port-region">Noord-Holland · Offshore · Defensie</span></td>
+  <td data-pmc="pmc01"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="VolkerWessels"><span class="chip-tier ta">A</span>VolkerWessels (VolkerInfra)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterk in Noord-Holland op haveninfra. Actief op haventerreinen en infra Den Helder.</div></div>
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Brede civiele haveninfra. Actief op grotere tenders havengebied Den Helder inclusief Defensie-gerelateerde infra.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief in Noord-Holland op infra. Regelmatig aanwezig op tenders.</div></div>
+    <div class="chip" data-tier="B" data-company="Ballast Nedam"><span class="chip-tier tb">B</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Complexe civiele infra Noord-Holland. Actief op D&C-tenders voor haveninfra en Defensie-gerelateerde civiele werken.</div></div>
+  </div></td>
+  <td data-pmc="pmc02"><div class="competitors">
+    <div class="chip intl-flag" data-tier="C" data-company="Bilfinger" data-intl="1"><span class="chip-tier tc">C</span>Bilfinger<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Beperkte tankterminalactiviteit Den Helder. Incidenteel op service en onderhoud offshore-gerelateerde opslag.</div></div>
+  </div></td>
+  <td data-pmc="pmc03"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Boskalis"><span class="chip-tier ta">A</span>Boskalis<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Dominant op maritieme infra en baggerwerk Den Helder (offshore supply haven). Sterk op kadeconstructie en havenonderhoud marinehaven.</div></div>
+    <div class="chip" data-tier="A" data-company="Van Oord"><span class="chip-tier ta">A</span>Van Oord<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Maritieme infra Den Helder. Actief op havenconstructie en baggerwerk. Concurreert direct met Boskalis op maritieme tenders.</div></div>
+    <div class="chip" data-tier="A" data-company="Hakkers"><span class="chip-tier ta">A</span>Hakkers<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kade- en oeverspecialist; directe rivaal van TBI Mobilis. Sterk in damwanden, funderingen en kademuurconstructies. Jarenlange trackrecord in havengebonden kadewerk bij Rotterdam, Amsterdam, NSP, Moerdijk en Den Helder.</div></div>
+    <div class="chip" data-tier="B" data-company="TBI Mobilis"><span class="chip-tier tb">B</span>TBI Mobilis<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Kade- en oeverspecialist. Actief op kade-gerelateerde tenders Den Helder inclusief marinehaven-component.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Jan De Nul" data-intl="1"><span class="chip-tier tc">C</span>Jan De Nul (NL)<span class="fn">³</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Incidenteel op grotere bagger- en havenconstructieprojecten Den Helder. Zie voetnoot 3.</div></div>
+  </div></td>
+  <td data-pmc="pmc04"><div class="competitors">
+    <div class="chip intl-flag" data-tier="B" data-company="Petrofac" data-intl="1"><span class="chip-tier tb">B</span>Petrofac<span class="fn">⁵</span><div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Offshore en energie-gerelateerde industriebouw. Den Helder als offshore hub relevant voor Petrofac. Positie verzwakt door herstructurering. Zie voetnoot 5.</div></div>
+    <div class="chip intl-flag" data-tier="B" data-company="Technip Energies" data-intl="1"><span class="chip-tier tb">B</span>Technip Energies<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Offshore-gerelateerde energie-infrastructuur. Actief op projecten Noord-Zee olie en gas sector via Den Helder.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Bilfinger" data-intl="1"><span class="chip-tier tc">C</span>Bilfinger<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Engineering voor offshore-gerelateerde procesinstallaties. Incidenteel op projecten offshore industrie Den Helder.</div></div>
+  </div></td>
+  <td data-pmc="pmc09"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra (walstroom Defensie)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Actief op walstroom voor marineschepen Den Helder. Sterkste concurrent energietransitie-infra voor Defensie.</div></div>
+    <div class="chip" data-tier="B" data-company="SPIE"><span class="chip-tier tb">B</span>SPIE Nederland<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>E&I voor energie-infra Den Helder. Actief op substation en walstroom-projecten haven.</div></div>
+    <div class="chip" data-tier="B" data-company="Boskalis"><span class="chip-tier tb">B</span>Boskalis / Van Oord<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Maritieme aannemers die ook de energiecomponent van havenprojecten meenemen. Relevant op geïntegreerde tenders walstroom + kade.</div></div>
+  </div></td>
+  <td data-pmc="pmc10"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Heijmans"><span class="chip-tier ta">A</span>Heijmans (Defensie team)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Kernmarkt: Den Helder is hét Defensie-havengebied NL. Dedicated Defensie-team met sterke positie marinebasis.</div></div>
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Utiliteitsbouw en infra voor Defensie. Sterk op facilitaire bouw marinebasis Den Helder.</div></div>
+    <div class="chip" data-tier="A" data-company="Ballast Nedam"><span class="chip-tier ta">A</span>Ballast Nedam (BESIX)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Civiele en maritieme Defensie-infra. Sterk op marinekade- en havenprojecten Den Helder.</div></div>
+    <div class="chip" data-tier="B" data-company="VolkerWessels"><span class="chip-tier tb">B</span>VolkerWessels<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief op civiele component Defensie-projecten Den Helder. Minder dedicated Defensie-focus maar relevant op grote tenders.</div></div>
+    <div class="chip" data-tier="B" data-company="DLV Project"><span class="chip-tier tb">B</span>DLV Project<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Specialist in beveiligde facilitaire bouw voor Defensie en justitie. Actief op marinebases en militaire installaties. Aanwezig bij Den Helder, NSP en Rotterdam op PMC10-tenders.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Hochtief" data-intl="1"><span class="chip-tier tc">C</span>Hochtief (via VINCI)<span class="fn">¹</span><div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Op selectieve grote Defensie-tenders. Beperkte NL-specifieke Defensie-footprint. Zie voetnoot 1.</div></div>
+  </div></td>
+  <td data-pmc="pmc11"><div class="competitors">
+    <div class="chip" data-tier="C" data-company="Heembouw"><span class="chip-tier tc">C</span>Heembouw<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Pharma-specialist; beperkte aanwezigheid Noord-Holland kop. Incidenteel op grotere life science-projecten.</div></div>
+    <div class="chip" data-tier="D" data-company="Regionaal utiliteitsbedrijf"><span class="chip-tier td">D</span>Regionaal utiliteitsbedrijf<div class="tooltip"><div class="tooltip-tier td">Tier D — Potentiële concurrent</div>Lokale utiliteitsbouwers Noord-Holland kop. Relevant op kleinere facilitaire projecten.</div></div>
+  </div></td>
+</tr>
+
+<!-- ═══ PORT OF BRABANT ═══ -->
+<tr data-haven="brabant" data-intensity="14">
+  <td class="port-name">Port of Brabant<span class="port-region">Inland ports cluster</span></td>
+  <td data-pmc="pmc01"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Van Gelder"><span class="chip-tier ta">A</span>Van Gelder Groep<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Thuismarkt Brabant. Sterk verankerd in civiele werken en grondverzet. Dominant op terreintenders.</div></div>
+    <div class="chip" data-tier="A" data-company="BAM Infra"><span class="chip-tier ta">A</span>BAM Infra<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Brede aanwezigheid op civiele haveninfra Brabant. Actief op grotere tenders maar minder regionaal verankerd dan Van Gelder.</div></div>
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Actief in Brabant op infra en terreinen. Regelmatige aanwezigheid op haveninfra-tenders Port of Brabant.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik Infra<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Grondverzet en industriële terreinen Brabant. Actief op havengebonden civiele werken in de regio.</div></div>
+    <div class="chip" data-tier="B" data-company="De Vries & van de Wiel"><span class="chip-tier tb">B</span>De Vries & van de Wiel<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Zwaar grondverzetbedrijf actief op grote civiele projecten in havens en industrie. Actief in Rotterdam, Moerdijk en Brabant op havengebonden grondwerk en civiele constructies.</div></div>
+    <div class="chip" data-tier="C" data-company="Reimert"><span class="chip-tier tc">C</span>Reimert Bouw & Infra<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Regionaal grondverzetbedrijf Brabant. Actief op kleinere terreintenders.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Ferrovial" data-intl="1"><span class="chip-tier tc">C</span>Ferrovial Construction NL<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Selectieve deelname aan grote civiele tenders in Brabant. Geen structurele aanwezigheid binnenhavens.</div></div>
+    <div class="chip" data-tier="C" data-company="Gebr. Van Kessel"><span class="chip-tier tc">C</span>Gebr. Van Kessel<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Grondverzetspecialist Brabant/Limburg. Actief op haventerreinen en civiele werken in Brabant en Moerdijk-regio. Regionaal verankerd met goede lokale kennis en relaties.</div></div>
+  </div></td>
+  <td data-pmc="pmc02"><div class="competitors">
+    <div class="chip intl-flag" data-tier="B" data-company="Bilfinger" data-intl="1"><span class="chip-tier tb">B</span>Bilfinger Tebodin<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Tankterminal-engineering Brabant. Minder frequent dan de zeehavens maar aanwezig op procesinstallatie-tenders.</div></div>
+  </div></td>
+  <td data-pmc="pmc03"><div class="competitors">
+    <div class="chip" data-tier="B" data-company="TBI Mobilis"><span class="chip-tier tb">B</span>TBI Mobilis<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Kade- en oeverspecialist ook actief bij binnenhavens. Relevant op kade- en damwandprojecten Port of Brabant.</div></div>
+    <div class="chip" data-tier="B" data-company="Van Wijnen"><span class="chip-tier tb">B</span>Van Wijnen<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Bouwer met aanwezigheid Brabant. Actief op havengebonden bouw en civiele projecten in de regio.</div></div>
+    <div class="chip" data-tier="C" data-company="BAM Infra"><span class="chip-tier tc">C</span>BAM Infra<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Incidenteel op kade-gerelateerde tenders binnenhavens Brabant. Minder actief dan in zeehavens.</div></div>
+  </div></td>
+  <td data-pmc="pmc04"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Heijmans"><span class="chip-tier ta">A</span>Heijmans (industriebouw)<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Sterkste concurrent industriebouw Brabant. Breed actief op chemische, logistieke en technische industrieprojecten. Meest directe concurrent DV H&I.</div></div>
+    <div class="chip" data-tier="B" data-company="Kuijpers"><span class="chip-tier tb">B</span>TBI / Kuijpers<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Installatie en technische bouw voor procesindustrie. Actief op middelgrote industriebouwtenders Brabant.</div></div>
+    <div class="chip" data-tier="B" data-company="Mourik"><span class="chip-tier tb">B</span>Mourik International<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Industriële projecten voor procesindustrie Brabant. Actief bij chemische en logistieke bedrijven.</div></div>
+    <div class="chip intl-flag" data-tier="C" data-company="Bilfinger" data-intl="1"><span class="chip-tier tc">C</span>Bilfinger<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Engineering en procesinstallaties. Incidenteel op industriebouwtenders Brabant.</div></div>
+  </div></td>
+  <td data-pmc="pmc09"><div class="competitors">
+    <div class="chip" data-tier="B" data-company="Heijmans"><span class="chip-tier tb">B</span>Heijmans (energie)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Energie-infra Brabant. Combineert civiel en energie op integrale projecten. Groeiende positie energietransitie Brabant.</div></div>
+    <div class="chip" data-tier="B" data-company="Enexis"><span class="chip-tier tb">B</span>Enexis (nettaken)<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Netbeheerder Zuid-Nederland. Actief op netwerkverzwaring en private aansluitingen binnenhavens Brabant.</div></div>
+    <div class="chip" data-tier="B" data-company="SPIE"><span class="chip-tier tb">B</span>SPIE Nederland<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>E&I voor energie-infra Brabant. Actief op BESS en substation-projecten in de regio.</div></div>
+    <div class="chip" data-tier="C" data-company="Equans"><span class="chip-tier tc">C</span>Equans<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Technische dienstverlener. Incidenteel op energie-infra tenders in Brabant-havens.</div></div>
+    <div class="chip" data-tier="D" data-company="Regionale installateurs"><span class="chip-tier td">D</span>Regionale installateurs<div class="tooltip"><div class="tooltip-tier td">Tier D — Potentiële concurrent</div>Diverse regionale E&I-bedrijven Brabant. Actief op kleinschalige energie-tenders.</div></div>
+  </div></td>
+  <td data-pmc="pmc10"><div class="empty-cell">— Beperkte markt</div></td>
+  <td data-pmc="pmc11"><div class="competitors">
+    <div class="chip" data-tier="A" data-company="Heembouw"><span class="chip-tier ta">A</span>Heembouw<div class="tooltip"><div class="tooltip-tier ta">Tier A — Structurele kernrivaal</div>Pharma-bouwspecialist; Brabant is kern-markt (Janssen, MSD, etc.). Sterkste concurrent DV H&I in pharma-bouw Brabant.</div></div>
+    <div class="chip" data-tier="B" data-company="BAM Infra"><span class="chip-tier tb">B</span>BAM Bouw & Techniek<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Breed portfolio pharma en life sciences. Actief op D&C-tenders technische gebouwen Brabant.</div></div>
+    <div class="chip" data-tier="B" data-company="Breijer"><span class="chip-tier tb">B</span>Breijer Bouw & Installatie<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Cleanroom en technisch complexe utiliteitsbouw. Actief bij farmabedrijven Brabant.</div></div>
+    <div class="chip" data-tier="B" data-company="Engie Axima"><span class="chip-tier tb">B</span>Engie Axima NL<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Cleanroom-installaties specialist. Actief bij grote farmabedrijven Brabant op HVAC en proceskoeling.</div></div>
+    <div class="chip" data-tier="B" data-company="G&S Bouw"><span class="chip-tier tb">B</span>G&S Bouw<div class="tooltip"><div class="tooltip-tier tb">Tier B — Actieve concurrent</div>Cleanroom en life sciences bouwspecialist. Actief op pharma-productiefaciliteiten en laboratoriumgebouwen. Aanwezig bij Rotterdam, Amsterdam en Brabant. Directe concurrent naast Heembouw in het pharma-segment.</div></div>
+    <div class="chip" data-tier="C" data-company="Kuijpers"><span class="chip-tier tc">C</span>Kuijpers (TBI)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Installatiebedrijf op pharma-bouw. Actief als onderaannemer en incidenteel als hoofdaannemer op pharma-projecten Brabant.</div></div>
+    <div class="chip" data-tier="C" data-company="Van Wijnen (utiliteit)"><span class="chip-tier tc">C</span>Van Wijnen (utiliteit)<div class="tooltip"><div class="tooltip-tier tc">Tier C — Incidentele concurrent</div>Naast PMC03 ook actief in utiliteitsbouw waaronder life sciences faciliteiten. Incidenteel aanwezig op pharma-gerelateerde bouwprojecten in Rotterdam, Amsterdam en Brabant.</div></div>
+  </div></td>
+</tr>
+
+<tr id="no-results"><td colspan="8">Geen resultaten voor de huidige filtercombinatie. Pas de filters aan.</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- FOOTNOTES -->
+<div class="footnotes">
+  <div class="footnotes-title">Voetnoten</div>
+  <ul class="fn-list">
+    <li><span class="fn-num">¹</span><strong>Hochtief (via VINCI):</strong> Overgenomen door ACS (Spanje) 2014; nauwe samenwerking VINCI (Frankrijk). In NL beperkte directe havenactiviteit; relevant als consortium-partner op grote internationale projecten. Marktpositie afhankelijk van VINCI-strategie voor NL.</li>
+    <li><span class="fn-num">²</span><strong>DEME:</strong> Belgische maritieme aannemer (Antwerpen), groot NL-kantoor Breda. Even groot als Boskalis/Van Oord wereldwijd. In NL-Belgisch grensgebied (NSP, Schelde) feitelijk Tier A. Bij puur NL zeehavens iets minder lokaal verankerd.</li>
+    <li><span class="fn-num">³</span><strong>Jan De Nul:</strong> Belgische maritieme aannemer (Jan De Nul Groep, Aalst). Directe rivaal Boskalis/Van Oord/DEME. Geen permanent groot NL-kantoor maar structureel aanwezig op grote NL havenprojecten via tijdelijke project-organisaties.</li>
+    <li><span class="fn-num">⁴</span><strong>Volker Staal en Funderingen (VSF):</strong> Gespecialiseerde VolkerWessels-dochter voor staalconstructies, funderingen en damwanden. Opzettelijk apart vermeld naast VolkerWessels-paraplu omdat zij rechtstreeks concurreren met TBI Mobilis op kadewerken.</li>
+    <li><span class="fn-num">⁵</span><strong>Petrofac — herstructurering:</strong> Significante financiële herstructurering 2023-2024 (schuldherschikking, CEO-wissel, verkoop onderdelen). Vertrouwen opdrachtgevers gedaald voor lange D&C-tenders. Kan herstellen; monitoren. Voorlopig Tier B i.p.v. Tier A.</li>
+    <li><span class="fn-num">⁶</span><strong>Siemens Energy / Schneider Electric als aannemers:</strong> Primair technologie- en systeemintegratiebedrijven maar opereren toenemend als turnkey contractor op substation- en BESS-projecten. Concurreren direct met civiele aannemers bij package-deal aanbestedingen.</li>
+    <li><span class="fn-num">⁷</span><strong>Tier D — Monitoringsprioriteit:</strong> Partijen in Tier D zijn niet actief concurrerend vandaag, maar hebben kenmerken die bij strategische wijziging tot directe concurrentie kunnen leiden. Aanbeveling: jaarlijkse herbeoordeling op upgraderisico.</li>
+  </ul>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-block">
+    <div class="footer-block-title">Structurele Tier-A concurrenten (meerdere havens)</div>
+    <ul>
+      <li><span class="highlight">BAM Infra / BAM Bouw & Techniek</span> — breedste portfolio; Tier A in PMC01/03/09/10/11 bij alle grote havens</li>
+      <li><span class="highlight">Boskalis Nederland</span> — Tier A PMC03 alle zeehavens; ook PMC04 relevant via CO₂/offshore</li>
+      <li><span class="highlight">Van Oord</span> — Tier A PMC03 alle zeehavens; maritieme infra kerncompetentie</li>
+      <li><span class="highlight">DEME</span> — Tier A PMC03 Rotterdam/NSP/Groningen; bijzonder sterk in grensgebied</li>
+      <li><span class="highlight">Jan De Nul</span> — Tier A PMC03 Rotterdam/NSP; directe rivaal Boskalis/Van Oord/DEME</li>
+      <li><span class="highlight">TBI Mobilis</span> — Tier A PMC03 alle havens als kade/oeverspecialist; onderbelicht rivaal</li>
+      <li><span class="highlight">Heijmans</span> — Tier A PMC04/10 breed; groeiend in PMC09 energie en industriebouw</li>
+      <li><span class="highlight">VolkerWessels</span> — Tier A PMC01 alle grote havens; ook PMC03 via VSF</li>
+      <li><span class="highlight">Ballast Nedam (BESIX)</span> — Tier A PMC01/03/10 meerdere havens; snel herpositionerend</li>
+      <li><span class="highlight">Strukton Wegen</span> — Tier A PMC01 Rotterdam/Amsterdam/Groningen/Zwolle</li>
+      <li><span class="highlight">SPIE Nederland</span> — Tier A PMC09 Rotterdam/Groningen/Moerdijk; BESS/walstroom kernmarkt</li>
+      <li><span class="highlight">Bilfinger Tebodin</span> — Tier A PMC02 alle havens met tankterminals; onbetwiste marktpositie</li>
+    </ul>
+  </div>
+  <div class="footer-block">
+    <div class="footer-block-title">Kansen & witte vlekken DV Haven & Industrie</div>
+    <ul>
+      <li><strong>PMC09 BESS & walstroom:</strong> Markt groeit explosief. DV H&I kan als geïntegreerde aannemer onderscheid maken via civiel+energie-bundeling</li>
+      <li><strong>PMC10 Defensie:</strong> Den Helder kernmarkt; Vlissingen (NSP) en Moerdijk groeikansen. Investeringsprogramma 2024-2030 creëert structureel nieuwe opdrachten</li>
+      <li><strong>PMC04 CO₂-opslag:</strong> Porthos Rotterdam en Eemshaven. Technip/Boskalis dominant maar DV kan civiele havencomponent claimen</li>
+      <li><strong>PMC11 Pharma:</strong> Hoge marge; nauwelijks havengerichte concurrentie. Brabant (Janssen, MSD) als kern-markt. Heembouw enige echte specialist</li>
+      <li><strong>PMC03 dry-side:</strong> Boskalis/DEME/Van Oord sterk in nat werk; DV kan winnen op dry-side integratie (terreinen + gebouwen + energie)</li>
+      <li><strong>Zwolle & Brabant:</strong> Laagste concurrentie-intensiteit → first-mover voordeel. Grote spelers minder aanwezig</li>
+      <li><strong>NSP Zeebrugge:</strong> Grensoverschrijdende projecten; Belgische spelers sterk maar ook kansen voor DV via grensoverschrijdende aanpak</li>
+    </ul>
+  </div>
+  <div class="footer-block">
+    <div class="footer-block-title">Bronnen & toelichting</div>
+    <ul>
+      <li><strong>Cobouw50 ranglijst 2024/2025</strong> — omzet- en marktdata NL bouwbedrijven; basis voor tier-indeling op schaal</li>
+      <li><strong>TenderNed & aanbestedingskalenders</strong> — openbare aanbestedingen havenbedrijven Rotterdam, Amsterdam, Groningen, NSP, Moerdijk 2022-2025</li>
+      <li><strong>Jaarverslagen 2023-2024</strong> — BAM, VolkerWessels, Heijmans, Boskalis, Van Oord, Ballast Nedam, DEME</li>
+      <li><strong>Sectorkennis DV H&I</strong> — interne marktkennis en ervaringen op gewonnen en verloren tenders</li>
+      <li><strong>Tier-indeling</strong> is indicatief op basis van bekende marktposities; jaarlijkse actualisatie aanbevolen</li>
+      <li><strong>Internationale spelers</strong> (DEME, Jan De Nul, Technip) opereren in NL via lokale entiteiten of tijdelijke project-organisaties</li>
+      <li><strong>Tier D</strong> — aanbeveling: jaarlijkse herbeoordeling upgraderisico (zie voetnoot 7)</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- /page-wrapper -->
+
+<div id="export-msg">📸 Screenshot wordt voorbereid... gebruik Ctrl+P of de browser printfunctie voor PDF export.</div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA & STATE
+// ══════════════════════════════════════════════
+const INTL_COMPANIES = new Set([
+  'deme','jan de nul','hochtief','ferrovial','technip energies','petrofac',
+  'bilfinger','bilfinger tebodin','cb&i','cb&i mcdermott','mcdermott',
+  'tata projects','arcelormittal','siemens energy','schneider electric',
+  'implenia','aarsleff','engie fabricom','visser & smit hanab'
+]);
+
+const GROWTH_PMCS = new Set(['pmc09','pmc04']);
+
+const state = {
+  tiers: new Set(['A','B','C','D']),
+  havens: new Set(['rotterdam','amsterdam','groningen','northsea','moerdijk','zwolle','denhelder','brabant']),
+  pmcs: new Set(['pmc01','pmc02','pmc03','pmc04','pmc09','pmc10','pmc11']),
+  companies: new Set(),
+  modes: new Set(), // 'sort','whitespots','tierd','international','growth'
+  sortDir: 'desc'
+};
+
+// ══════════════════════════════════════════════
+// PILL TOGGLE
+// ══════════════════════════════════════════════
+function togglePill(el) {
+  const group = el.dataset.group;
+  const val = el.dataset.val;
+  const stateSet = group === 'tier' ? state.tiers : group === 'haven' ? state.havens : state.pmcs;
+
+  if (el.classList.contains('active')) {
+    // Only deactivate if it won't leave zero active in group
+    const allInGroup = document.querySelectorAll(`[data-group="${group}"]`);
+    const activeInGroup = [...allInGroup].filter(p => p.classList.contains('active'));
+    if (activeInGroup.length <= 1) return; // keep at least one
+    el.classList.remove('active');
+    stateSet.delete(val);
+  } else {
+    el.classList.add('active');
+    stateSet.add(val);
+  }
+  applyFilters();
+}
+
+// ══════════════════════════════════════════════
+// MODE TOGGLES
+// ══════════════════════════════════════════════
+function toggleMode(mode) {
+  const pillMap = { sort:'pill-sort', whitespots:'pill-wv', tierd:'pill-tierd', international:'pill-intl', growth:'pill-growth' };
+  const pill = document.getElementById(pillMap[mode]);
+  const modeClassMap = { whitespots:'mode-wv', international:'mode-int', growth:'mode-growth', tierd:'mode-tierd', sort:null };
+
+  if (state.modes.has(mode)) {
+    state.modes.delete(mode);
+    pill.classList.remove('active', modeClassMap[mode] || 'active');
+  } else {
+    state.modes.add(mode);
+    if (modeClassMap[mode]) pill.classList.add('active', modeClassMap[mode]);
+    else pill.classList.add('active');
+  }
+  applyFilters();
+}
+
+function toggleSort() {
+  if (state.modes.has('sort')) {
+    state.sortDir = state.sortDir === 'desc' ? 'asc' : 'desc';
+  } else {
+    state.modes.add('sort');
+    document.getElementById('pill-sort').classList.add('active');
+    state.sortDir = 'desc';
+  }
+  applyFilters();
+}
+
+// ══════════════════════════════════════════════
+// COMPANY SEARCH
+// ══════════════════════════════════════════════
+function getAllCompanies() {
+  const names = new Set();
+  document.querySelectorAll('.chip[data-company]').forEach(chip => {
+    names.add(chip.dataset.company);
+  });
+  return [...names].sort();
+}
+
+let suggestSelected = -1;
+
+function onCompanyInput() {
+  const val = document.getElementById('company-input').value.trim().toLowerCase();
+  const box = document.getElementById('company-suggestions');
+  if (!val) { box.classList.remove('open'); box.innerHTML = ''; return; }
+  const matches = getAllCompanies().filter(n => n.toLowerCase().includes(val) && !state.companies.has(n));
+  if (!matches.length) { box.classList.remove('open'); box.innerHTML = ''; return; }
+  box.innerHTML = matches.slice(0,12).map((n,i) => `<div class="sugg-item" data-idx="${i}" onmousedown="addCompany('${n.replace(/'/g,"\\'")}')">  ${n}</div>`).join('');
+  box.classList.add('open');
+  suggestSelected = -1;
+}
+
+function onCompanyKey(e) {
+  const box = document.getElementById('company-suggestions');
+  const items = box.querySelectorAll('.sugg-item');
+  if (e.key === 'ArrowDown') { suggestSelected = Math.min(suggestSelected+1, items.length-1); highlightSuggest(items); e.preventDefault(); }
+  else if (e.key === 'ArrowUp') { suggestSelected = Math.max(suggestSelected-1, -1); highlightSuggest(items); e.preventDefault(); }
+  else if (e.key === 'Enter') {
+    if (suggestSelected >= 0 && items[suggestSelected]) { items[suggestSelected].dispatchEvent(new MouseEvent('mousedown')); }
+    else {
+      const v = document.getElementById('company-input').value.trim();
+      if (v) addCompany(v);
+    }
+    e.preventDefault();
+  } else if (e.key === 'Escape') { box.classList.remove('open'); }
+}
+
+function highlightSuggest(items) {
+  items.forEach((el,i) => el.classList.toggle('selected', i === suggestSelected));
+}
+
+function addCompany(name) {
+  document.getElementById('company-input').value = '';
+  document.getElementById('company-suggestions').classList.remove('open');
+  if (!name) return;
+  // Normalize: find actual company name from data
+  const all = getAllCompanies();
+  const match = all.find(n => n.toLowerCase() === name.toLowerCase()) || name;
+  state.companies.add(match);
+  renderCompanyTags();
+  applyFilters();
+}
+
+function removeCompany(name) {
+  state.companies.delete(name);
+  renderCompanyTags();
+  applyFilters();
+}
+
+function renderCompanyTags() {
+  const container = document.getElementById('company-tags');
+  container.innerHTML = [...state.companies].map(n =>
+    `<span class="company-tag">${n}<span class="company-tag-remove" onclick="removeCompany('${n.replace(/'/g,"\\'")}')">✕</span></span>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════
+// CORE FILTER ENGINE
+// ══════════════════════════════════════════════
+function applyFilters() {
+  const tbody = document.getElementById('table-body');
+  const rows = [...tbody.querySelectorAll('tr[data-haven]')];
+  const allPmcCols = [...document.querySelectorAll('th[data-pmc]')];
+
+  // 1. PMC column visibility
+  allPmcCols.forEach(th => {
+    const pmc = th.dataset.pmc;
+    const idx = [...th.parentElement.children].indexOf(th);
+    const show = state.pmcs.has(pmc);
+    th.classList.toggle('col-hidden', !show);
+    document.querySelectorAll(`td[data-pmc="${pmc}"]`).forEach(td => td.classList.toggle('col-hidden', !show));
+    // Growth mode on header
+    if (state.modes.has('growth') && GROWTH_PMCS.has(pmc)) th.classList.add('growth-pmc');
+    else th.classList.remove('growth-pmc');
+  });
+
+  // 2. Row & chip visibility
+  let visibleRows = 0;
+  rows.forEach(row => {
+    const haven = row.dataset.haven;
+    const havenVisible = state.havens.has(haven);
+    row.classList.toggle('row-hidden', !havenVisible);
+    if (!havenVisible) return;
+    visibleRows++;
+
+    // Per-cell processing
+    row.querySelectorAll('td[data-pmc]').forEach(td => {
+      const pmc = td.dataset.pmc;
+      if (!state.pmcs.has(pmc)) return;
+
+      const chips = [...td.querySelectorAll('.chip[data-tier]')];
+      let cellHasVisible = false;
+
+      // White-spots mode: determine if cell qualifies
+      const tierACount = chips.filter(c => c.dataset.tier === 'A').length;
+      const isWhiteSpot = tierACount === 0;
+
+      chips.forEach(chip => {
+        const tier = chip.dataset.tier;
+        const company = chip.dataset.company || '';
+        const isIntl = chip.dataset.intl === '1' ||
+          [...INTL_COMPANIES].some(k => company.toLowerCase().includes(k));
+
+        // Base tier filter
+        let show = state.tiers.has(tier);
+
+        // Company filter
+        if (state.companies.size > 0) {
+          const companyMatch = [...state.companies].some(sel =>
+            company.toLowerCase().includes(sel.toLowerCase()) ||
+            sel.toLowerCase().includes(company.toLowerCase())
+          );
+          if (!companyMatch) {
+            chip.classList.add('chip-dimmed');
+            chip.classList.remove('chip-hidden','chip-highlighted');
+          } else {
+            chip.classList.remove('chip-dimmed','chip-hidden');
+            chip.classList.add('chip-highlighted');
+          }
+          cellHasVisible = true;
+          return;
+        }
+
+        // Tier D mode: only show tier D chips highlighted
+        if (state.modes.has('tierd')) {
+          chip.classList.remove('chip-highlighted','chip-dimmed','tierd-highlight','chip-hidden','intl-flag');
+          if (tier === 'D') {
+            chip.classList.add('tierd-highlight');
+            show = true;
+          } else {
+            chip.classList.add('chip-dimmed');
+            show = true; // still show, just dimmed
+          }
+        } else {
+          chip.classList.remove('tierd-highlight');
+        }
+
+        // International mode: add globe marker
+        if (state.modes.has('international')) {
+          if (isIntl) chip.classList.add('intl-flag');
+          else chip.classList.remove('intl-flag');
+        } else {
+          chip.classList.remove('intl-flag');
+        }
+
+        chip.classList.toggle('chip-hidden', !show);
+        chip.classList.remove('chip-dimmed');
+        if (show) cellHasVisible = true;
+      });
+
+      // White-spots: highlight cell background if no Tier A
+      if (state.modes.has('whitespots')) {
+        td.classList.toggle('white-spot', isWhiteSpot && state.pmcs.has(pmc));
+      } else {
+        td.classList.remove('white-spot');
+      }
+    });
+  });
+
+  // 3. Sort by intensity
+  if (state.modes.has('sort')) {
+    const visRows = rows.filter(r => !r.classList.contains('row-hidden'));
+    visRows.sort((a,b) => {
+      const ia = parseInt(a.dataset.intensity)||0;
+      const ib = parseInt(b.dataset.intensity)||0;
+      return state.sortDir === 'desc' ? ib - ia : ia - ib;
+    });
+    visRows.forEach(r => tbody.appendChild(r));
+    document.getElementById('sort-arrow').textContent = state.sortDir === 'desc' ? '↓' : '↑';
+  } else {
+    // Restore original order
+    const order = ['rotterdam','amsterdam','groningen','northsea','moerdijk','zwolle','denhelder','brabant'];
+    order.forEach(haven => {
+      const row = rows.find(r => r.dataset.haven === haven);
+      if (row) tbody.appendChild(row);
+    });
+    document.getElementById('sort-arrow').textContent = '↕';
+  }
+
+  // Append no-results row last
+  tbody.appendChild(document.getElementById('no-results'));
+
+  // 4. No-results
+  document.getElementById('no-results').style.display = visibleRows === 0 ? 'table-row' : 'none';
+
+  // 5. Summary
+  document.getElementById('visible-count').textContent = `${visibleRows} van 8`;
+  const activeModes = [...state.modes].map(m => ({
+    sort:'sortering actief', whitespots:'witte vlekken actief', tierd:'Tier D focus actief',
+    international:'internationaal actief', growth:'groeimarkten actief'
+  }[m])).filter(Boolean);
+  document.getElementById('active-modes-label').textContent = activeModes.length ? activeModes.join(' · ') : '';
+}
+
+// ══════════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════════
+function resetFilters() {
+  // Tiers
+  state.tiers = new Set(['A','B','C','D']);
+  document.querySelectorAll('[data-group="tier"]').forEach(p => p.classList.add('active'));
+  // Havens
+  state.havens = new Set(['rotterdam','amsterdam','groningen','northsea','moerdijk','zwolle','denhelder','brabant']);
+  document.querySelectorAll('[data-group="haven"]').forEach(p => p.classList.add('active'));
+  // PMCs
+  state.pmcs = new Set(['pmc01','pmc02','pmc03','pmc04','pmc09','pmc10','pmc11']);
+  document.querySelectorAll('[data-group="pmc"]').forEach(p => p.classList.add('active'));
+  // Companies
+  state.companies = new Set();
+  document.getElementById('company-input').value = '';
+  document.getElementById('company-tags').innerHTML = '';
+  document.getElementById('company-suggestions').classList.remove('open');
+  // Modes
+  state.modes = new Set();
+  ['pill-sort','pill-wv','pill-tierd','pill-intl','pill-growth'].forEach(id => {
+    document.getElementById(id).className = 'pill';
+  });
+  applyFilters();
+}
+
+// ══════════════════════════════════════════════
+// EXPORT PNG
+// ══════════════════════════════════════════════
+function exportPNG() {
+  const msg = document.getElementById('export-msg');
+  msg.style.display = 'block';
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+  }, 300);
+}
+
+// Close suggestions on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.company-search-wrap')) {
+    document.getElementById('company-suggestions').classList.remove('open');
+  }
+});
+
+// Init
+applyFilters();
+</script>
+</body>
+</html>
