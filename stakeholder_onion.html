@@ -3,36 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DV Haven & Industrie – Stakeholder Onion</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<title>DV Haven & Industrie – Stakeholder Onion v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d1117;
-    --bg2: #131920;
-    --bg3: #1a2330;
+    --bg: #0b0f15;
+    --bg2: #111820;
+    --bg3: #182030;
     --border: rgba(255,255,255,0.07);
     --text: #e8edf2;
     --text-muted: #7a8fa6;
-    --text-dim: #4a5a6a;
+    --text-dim: #3a4a5a;
 
     --tier-a: #00d4aa;
-    --tier-a-bg: rgba(0,212,170,0.12);
-    --tier-a-glow: rgba(0,212,170,0.3);
+    --tier-a-bg: rgba(0,212,170,0.10);
     --tier-b: #f5a623;
-    --tier-b-bg: rgba(245,166,35,0.12);
-    --tier-b-glow: rgba(245,166,35,0.25);
+    --tier-b-bg: rgba(245,166,35,0.10);
     --tier-c: #4d9de0;
-    --tier-c-bg: rgba(77,157,224,0.10);
-    --tier-c-glow: rgba(77,157,224,0.2);
+    --tier-c-bg: rgba(77,157,224,0.09);
     --tier-d: #8b7fa8;
-    --tier-d-bg: rgba(139,127,168,0.08);
-    --tier-d-glow: rgba(139,127,168,0.15);
+    --tier-d-bg: rgba(139,127,168,0.07);
 
-    --accent: #00d4aa;
+    /* Relatietype kleuren */
+    --rel-opdracht:  #00d4aa;   /* groen  – opdrachtgeversketen */
+    --rel-info:      #4d9de0;   /* blauw  – informatiestroom    */
+    --rel-financieel:#f5a623;   /* goud   – financiële keten    */
+    --rel-vergunning:#c77dff;   /* paars  – vergunning/afh.     */
+
     --dv-blue: #1a4a8a;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     background: var(--bg);
@@ -40,779 +41,311 @@
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Background grid */
+  /* subtle grid */
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background-image:
-      linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
+      linear-gradient(rgba(0,212,170,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none; z-index: 0;
   }
 
-  /* Header */
-  header {
-    position: relative;
-    z-index: 10;
-    padding: 16px 48px 16px;
+  /* ── NAV ─────────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(11,15,21,0.95);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px; height: 52px; gap: 24px;
   }
-
-  .logo-block {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+  .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .nav-logo {
+    width: 30px; height: 30px; background: #c8102e; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 11px; color: #fff;
   }
-
-  .logo-mark {
-    width: 42px;
-    height: 42px;
-    background: linear-gradient(135deg, var(--dv-blue), #2a6abf);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 14px;
-    color: white;
-    letter-spacing: -0.5px;
-    flex-shrink: 0;
+  .nav-brand-text { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: var(--text); }
+  .nav-brand-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-dim); letter-spacing: .06em; }
+  .nav-badge {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .08em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 3px;
+    border: 1px solid var(--border); color: var(--text-muted);
   }
+  .nav-badge.v { border-color: rgba(200,16,46,.4); color: #ff6b6b; }
 
-  .logo-text h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.1;
-  }
-
-  .logo-text p {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 300;
-    margin-top: 2px;
-  }
-
-  .header-meta {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: flex-end;
-  }
-
-  .meta-tag {
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-weight: 500;
-    border: 1px solid;
-    white-space: nowrap;
-  }
-
-  .meta-tag.a { color: var(--tier-a); border-color: var(--tier-a); background: var(--tier-a-bg); }
-  .meta-tag.b { color: var(--tier-b); border-color: var(--tier-b); background: var(--tier-b-bg); }
-  .meta-tag.c { color: var(--tier-c); border-color: var(--tier-c); background: var(--tier-c-bg); }
-  .meta-tag.d { color: var(--tier-d); border-color: var(--tier-d); background: var(--tier-d-bg); }
-
-  /* Layout */
-  .main {
-    position: relative;
-    z-index: 5;
+  /* ── MAIN LAYOUT ─────────────────────────── */
+  .layout {
+    position: relative; z-index: 5;
     display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 0;
-    min-height: calc(100vh - 105px);
+    grid-template-columns: 1fr 320px;
+    flex: 1;
+    min-height: 0;
   }
 
-  /* Onion canvas */
+  /* ── CANVAS ──────────────────────────────── */
   .canvas-wrap {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    min-height: 700px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px 24px;
+  }
+  #onion-svg {
+    width: 100%; max-width: 740px; height: auto; overflow: visible;
   }
 
-  .onion-svg {
-    width: 100%;
-    max-width: 720px;
-    height: auto;
-    overflow: visible;
-  }
-
-  /* Sidebar */
+  /* ── SIDEBAR ─────────────────────────────── */
   .sidebar {
     border-left: 1px solid var(--border);
-    padding: 32px 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .sidebar-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 20px;
-  }
-
-  /* Tier legend blocks */
-  .tier-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 28px;
-  }
-
-  .tier-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
-    border: 1px solid transparent;
-  }
-
-  .tier-item:hover, .tier-item.active {
-    border-color: var(--border);
-    background: var(--bg3);
-  }
-
-  .tier-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: 4px;
-  }
-
-  .tier-label {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 2px;
-  }
-
-  .tier-desc {
-    font-size: 11px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    font-weight: 300;
-  }
-
-  /* Stakeholder list */
-  .stk-list-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 12px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-  }
-
-  .stk-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 0;
     overflow-y: auto;
-    max-height: 380px;
-    padding-right: 4px;
+  }
+  .sidebar::-webkit-scrollbar { width: 3px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sb-title {
+    font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim);
+    margin-bottom: 14px;
   }
 
-  .stk-list::-webkit-scrollbar { width: 3px; }
-  .stk-list::-webkit-scrollbar-track { background: transparent; }
-  .stk-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  /* tier legend */
+  .tier-legend { display: flex; flex-direction: column; gap: 3px; margin-bottom: 22px; }
+  .tier-item {
+    display: flex; align-items: flex-start; gap: 9px;
+    padding: 9px 10px; border-radius: 7px; cursor: pointer;
+    transition: background .15s; border: 1px solid transparent;
+  }
+  .tier-item:hover, .tier-item.active { background: var(--bg3); border-color: var(--border); }
+  .tier-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .tier-label { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; margin-bottom: 1px; }
+  .tier-desc { font-size: 10px; color: var(--text-muted); line-height: 1.5; font-weight: 300; }
 
-  .stk-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s;
-    font-size: 12px;
-    color: var(--text-muted);
-    border: 1px solid transparent;
+  /* relation legend */
+  .rel-legend { display: flex; flex-direction: column; gap: 5px; margin-bottom: 22px; }
+  .rel-item { display: flex; align-items: center; gap: 9px; padding: 5px 10px; border-radius: 6px; }
+  .rel-line {
+    width: 28px; height: 2px; flex-shrink: 0; border-radius: 1px;
+    position: relative;
+  }
+  .rel-line::after {
+    content: ''; position: absolute; right: -1px; top: -3px;
+    border: 4px solid transparent; border-left-width: 6px;
+  }
+  .rel-line.opdracht { background: var(--rel-opdracht); }
+  .rel-line.opdracht::after { border-left-color: var(--rel-opdracht); }
+  .rel-line.info { background: var(--rel-info); }
+  .rel-line.info::after { border-left-color: var(--rel-info); }
+  .rel-line.financieel { background: var(--rel-financieel); }
+  .rel-line.financieel::after { border-left-color: var(--rel-financieel); }
+  .rel-line.vergunning { background: var(--rel-vergunning); }
+  .rel-line.vergunning::after { border-left-color: var(--rel-vergunning); }
+  .rel-label { font-size: 11px; color: var(--text-muted); }
+
+  /* dv relation badge legend */
+  .dv-badge-legend { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 22px; }
+  .dv-badge-ex {
+    font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 7px;
+    border-radius: 3px; border: 1px solid;
   }
 
-  .stk-item:hover {
-    background: var(--bg3);
-    color: var(--text);
-    border-color: var(--border);
-  }
-
-  .stk-item.highlighted {
-    color: var(--text);
-    background: var(--bg3);
-  }
-
-  .stk-item .stk-nr {
-    font-family: 'Syne', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    width: 18px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-
-  .stk-item .stk-tier-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* Tooltip */
-  .tooltip {
-    position: fixed;
-    z-index: 1000;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 18px;
-    min-width: 280px;
-    max-width: 360px;
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(6px);
-    transition: opacity 0.15s, transform 0.15s;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  }
-
-  .tooltip.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .tt-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-
-  .tt-nr {
-    font-family: 'Syne', sans-serif;
-    font-size: 10px;
-    font-weight: 800;
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .tt-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .tt-tier-badge {
-    margin-left: auto;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
-    border: 1px solid;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .tt-body { font-size: 12px; line-height: 1.6; color: var(--text-muted); margin-bottom: 10px; }
-
-  .tt-row {
-    display: flex;
-    gap: 6px;
-    margin-top: 6px;
-    flex-wrap: wrap;
-  }
-
-  .tt-pmc {
-    font-size: 10px;
-    padding: 2px 7px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text-muted);
-  }
-
-  .tt-rel {
-    font-size: 11px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    border-top: 1px solid var(--border);
-    padding-top: 8px;
-    margin-top: 6px;
-  }
-
-  /* SVG node styles via JS */
-  .onion-node {
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-
-  .onion-node:hover { opacity: 0.85; }
-
-  /* Filter bar */
-  .filter-bar {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-
+  /* filter bar */
+  .filter-bar { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 18px; }
   .filter-btn {
-    font-size: 11px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.15s;
+    font-size: 10px; padding: 4px 11px; border-radius: 20px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all .15s;
   }
+  .filter-btn:hover { border-color: rgba(255,255,255,.2); color: var(--text); }
+  .filter-btn.active { color: var(--text); border-color: rgba(255,255,255,.3); background: var(--bg3); }
 
-  .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-  .filter-btn.active { color: var(--text); border-color: rgba(255,255,255,0.3); background: var(--bg3); }
-
-  .count-badge {
-    display: inline-block;
-    margin-left: 4px;
-    font-size: 9px;
-    opacity: 0.6;
-  }
-
-  /* Info strip */
-  .info-strip {
-    margin-top: auto;
-    padding-top: 20px;
+  /* stakeholder list */
+  .stk-list-title {
+    font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--text-dim);
+    margin-bottom: 8px; padding-top: 16px;
     border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--text-dim);
-    line-height: 1.7;
+  }
+  .stk-list { display: flex; flex-direction: column; gap: 1px; max-height: 300px; overflow-y: auto; }
+  .stk-list::-webkit-scrollbar { width: 2px; }
+  .stk-list::-webkit-scrollbar-thumb { background: var(--border); }
+  .stk-item {
+    display: flex; align-items: center; gap: 8px; padding: 6px 9px;
+    border-radius: 5px; cursor: pointer; transition: background .12s;
+    font-size: 11px; color: var(--text-muted); border: 1px solid transparent;
+  }
+  .stk-item:hover, .stk-item.active { background: var(--bg3); color: var(--text); border-color: var(--border); }
+  .stk-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .stk-tier { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700; width: 14px; flex-shrink: 0; }
+
+  /* tooltip */
+  .tooltip {
+    position: fixed; z-index: 1000;
+    background: #121c28; border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    min-width: 280px; max-width: 340px;
+    pointer-events: none; opacity: 0;
+    transform: translateY(8px) scale(.98);
+    transition: opacity .15s, transform .15s;
+    box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  }
+  .tooltip.visible { opacity: 1; transform: translateY(0) scale(1); }
+  .tt-head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .tt-nr {
+    font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 800;
+    width: 22px; height: 22px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .tt-name { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; line-height: 1.2; }
+  .tt-badge {
+    margin-left: auto; font-size: 9px; font-weight: 700; padding: 2px 7px;
+    border-radius: 8px; border: 1px solid; white-space: nowrap; flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .tt-def { font-size: 11px; line-height: 1.6; color: var(--text-muted); margin-bottom: 9px; }
+  .tt-rel-header { font-size: 10px; color: rgba(232,237,242,.5); margin-bottom: 5px; font-family: 'DM Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
+  .tt-rel-text { font-size: 11px; line-height: 1.6; color: var(--text-muted); margin-bottom: 9px; }
+  .tt-rels { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--border); padding-top: 8px; }
+  .tt-rel-row { display: flex; align-items: center; gap: 7px; font-size: 10px; }
+  .tt-rel-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .tt-rel-type { font-family: 'DM Mono', monospace; font-size: 9px; opacity: .6; min-width: 72px; }
+  .tt-rel-to { font-size: 10px; color: var(--text-muted); }
+  .tt-pmcs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .tt-pmc {
+    font-size: 9px; padding: 2px 6px; background: var(--bg3);
+    border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* DV relation badge on node */
+  .dv-badge {
+    font-family: 'DM Mono', monospace; font-size: 7.5px; letter-spacing: .04em;
+    pointer-events: none;
+  }
+
+  /* animated line */
+  .rel-edge {
+    pointer-events: none;
+    stroke-linecap: round;
+    transition: opacity .2s;
+  }
+  .rel-edge.hidden { opacity: 0 !important; }
+
+  .onion-node { cursor: pointer; }
+  .onion-node .node-pill { transition: filter .2s; }
+  .onion-node:hover .node-pill, .onion-node.active .node-pill {
+    filter: brightness(1.25) drop-shadow(0 0 6px currentColor);
   }
 </style>
-
-<style id="shared-nav-css">
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap');
-#dv-nav {
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  background: #0D1117;
-  border-bottom: 1px solid #2C3A4A;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  height: 52px;
-  gap: 24px;
-  font-family: 'DM Mono', monospace;
-}
-#dv-nav .nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-#dv-nav .nav-logo {
-  width: 28px;
-  height: 28px;
-  background: #C8102E;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 11px;
-  color: white;
-  letter-spacing: -0.5px;
-  flex-shrink: 0;
-}
-#dv-nav .nav-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: #E2E8F0;
-  white-space: nowrap;
-}
-#dv-nav .nav-subtitle {
-  font-size: 9px;
-  color: #8898AA;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-#dv-nav .nav-links {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-#dv-nav .nav-link {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 14px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 11px;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 0.06em;
-  color: #8898AA;
-  border: 1px solid transparent;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-#dv-nav .nav-link:hover {
-  color: #E2E8F0;
-  background: rgba(255,255,255,0.05);
-  border-color: #2C3A4A;
-}
-#dv-nav .nav-link.active {
-  color: #fff;
-  background: rgba(200,16,46,0.12);
-  border-color: rgba(200,16,46,0.4);
-}
-#dv-nav .nav-link .nav-icon {
-  font-size: 13px;
-  line-height: 1;
-}
-#dv-nav .nav-divider {
-  width: 1px;
-  height: 20px;
-  background: #2C3A4A;
-  margin: 0 4px;
-}
-#dv-nav .nav-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-#dv-nav .nav-badge {
-  font-size: 9px;
-  padding: 3px 8px;
-  border-radius: 3px;
-  border: 1px solid #2C3A4A;
-  color: #8898AA;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-#dv-nav .nav-badge.version {
-  border-color: rgba(200,16,46,0.4);
-  color: #ff6b6b;
-}
-@media (max-width: 700px) {
-  #dv-nav { padding: 0 14px; }
-  #dv-nav .nav-subtitle, #dv-nav .nav-meta { display: none; }
-}
-</style>
-
-
-<style id="shared-nav-css">
-.dv-nav {
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  background: rgba(13,17,23,0.97);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  font-family: 'Syne', 'DM Sans', sans-serif;
-}
-.dv-nav-inner {
-  max-width: 1800px;
-  margin: 0 auto;
-  padding: 0 32px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-.dv-nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  flex-shrink: 0;
-}
-.dv-nav-logomark {
-  width: 30px;
-  height: 30px;
-  background: #C8102E;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 11px;
-  color: white;
-  letter-spacing: -0.5px;
-  flex-shrink: 0;
-}
-.dv-nav-title {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  color: #e2e8f0;
-  line-height: 1.1;
-}
-.dv-nav-subtitle {
-  font-size: 10px;
-  color: #4a5a6a;
-  font-family: 'DM Mono', monospace;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-}
-.dv-nav-links {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  justify-content: center;
-}
-.dv-nav-link {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 16px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 600;
-  color: #8898AA;
-  transition: all 0.15s;
-  border: 1px solid transparent;
-  white-space: nowrap;
-}
-.dv-nav-link:hover {
-  color: #e2e8f0;
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.08);
-}
-.dv-nav-link.active {
-  color: #fff;
-  background: rgba(255,255,255,0.07);
-  border-color: rgba(255,255,255,0.12);
-}
-.dv-nav-link-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  flex-shrink: 0;
-}
-.dv-nav-link.active .dv-nav-link-icon {
-  background: rgba(200,16,46,0.2);
-}
-.dv-nav-link-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.4;
-}
-.dv-nav-link.active .dv-nav-link-dot {
-  background: #C8102E;
-  opacity: 1;
-}
-.dv-nav-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-.dv-nav-version {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  color: #4a5a6a;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.dv-nav-date {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  color: #4a5a6a;
-  letter-spacing: 0.04em;
-  padding: 3px 8px;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 4px;
-}
-.dv-nav-divider {
-  width: 1px;
-  height: 20px;
-  background: rgba(255,255,255,0.07);
-}
-</style>
-
 </head>
 <body>
 
-<nav class="dv-nav">
-  <div class="dv-nav-inner">
-    <a class="dv-nav-brand" href="index.html">
-      <div class="dv-nav-logomark">DV</div>
-      <div>
-        <div class="dv-nav-title">Haven & Industrie</div>
-        <div class="dv-nav-subtitle">Marktonderzoek 2026</div>
-      </div>
-    </a>
-
-    <div class="dv-nav-links">
-      <a class="dv-nav-link active" href="stakeholder_onion.html">
-        <span class="dv-nav-link-dot"></span>
-        Stakeholder Onion
-      </a>
-      <a class="dv-nav-link " href="concurrentie.html">
-        <span class="dv-nav-link-dot"></span>
-        Concurrentieanalyse
-      </a>
-    </div>
-
-    <div class="dv-nav-meta">
-      <span class="dv-nav-version">v5.0</span>
-      <div class="dv-nav-divider"></div>
-      <span class="dv-nav-date" id="nav-date">—</span>
-    </div>
-  </div>
-</nav>
-<script>
-(function(){
-  var d = new Date();
-  var months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-  document.getElementById('nav-date').textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-})();
-</script>
-
-
-<nav id="dv-nav">
-  <div class="nav-brand">
+<nav>
+  <a class="nav-brand" href="#">
     <div class="nav-logo">DV</div>
     <div>
-      <div class="nav-title">Haven &amp; Industrie</div>
-      <div class="nav-subtitle">Marktonderzoek 2026</div>
+      <div class="nav-brand-text">Haven & Industrie</div>
+      <div class="nav-brand-sub">Marktonderzoek 2026</div>
     </div>
-  </div>
-  <div class="nav-links">
-    <a class="nav-link" href="concurrentie_dura_vermeer_v5__2_.html">
-      <span class="nav-icon">⬡</span> Concurrentieanalyse
-    </a>
-    <div class="nav-divider"></div>
-    <a class="nav-link active" href="DV_HI_Stakeholder_Onion.html">
-      <span class="nav-icon">◎</span> Stakeholder Onion
-    </a>
-  </div>
-  <div class="nav-meta">
+  </a>
+  <div style="display:flex;gap:8px;align-items:center">
     <span class="nav-badge">34 types</span>
     <span class="nav-badge">8 regio's</span>
-    <span class="nav-badge version">v1 — 2026</span>
+    <span class="nav-badge v">v2 — relaties</span>
   </div>
 </nav>
 
-
-<header>
-  <div class="logo-block">
-    <div class="logo-mark">DV</div>
-    <div class="logo-text">
-      <h1>Haven & Industrie</h1>
-      <p>Stakeholder Onion Model — Marktonderzoek 2024</p>
-    </div>
-  </div>
-  <div class="header-meta">
-    <span class="meta-tag a">A – Interview fase 1</span>
-    <span class="meta-tag b">B – Interview fase 2</span>
-    <span class="meta-tag c">C – In kaart brengen</span>
-    <span class="meta-tag d">D – Monitor</span>
-  </div>
-</header>
-
-<div class="main">
+<div class="layout">
   <div class="canvas-wrap">
-    <svg class="onion-svg" id="onion" viewBox="0 0 720 680" xmlns="http://www.w3.org/2000/svg"></svg>
+    <svg id="onion-svg" viewBox="0 0 760 720" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
 
   <div class="sidebar">
-    <div class="sidebar-title">Tier indeling</div>
+
+    <div class="sb-title">Tier indeling</div>
     <div class="tier-legend" id="tier-legend">
       <div class="tier-item" data-tier="A">
         <div class="tier-dot" style="background:var(--tier-a)"></div>
         <div>
           <div class="tier-label" style="color:var(--tier-a)">Tier A — Interview fase 1</div>
-          <div class="tier-desc">Directe beslissingsmacht. Prioriteit voor interviews in fase 1 van het onderzoek.</div>
+          <div class="tier-desc">Directe beslissingsmacht. Prioriteit voor interviews.</div>
         </div>
       </div>
       <div class="tier-item" data-tier="B">
         <div class="tier-dot" style="background:var(--tier-b)"></div>
         <div>
           <div class="tier-label" style="color:var(--tier-b)">Tier B — Interview fase 2</div>
-          <div class="tier-desc">Indirecte invloed of brede marktkennis. Interview in fase 2.</div>
+          <div class="tier-desc">Indirecte invloed of brede marktkennis.</div>
         </div>
       </div>
       <div class="tier-item" data-tier="C">
         <div class="tier-dot" style="background:var(--tier-c)"></div>
         <div>
           <div class="tier-label" style="color:var(--tier-c)">Tier C — In kaart brengen</div>
-          <div class="tier-desc">Onderdeel van het ecosysteem. Geen interview nodig.</div>
+          <div class="tier-desc">Onderdeel van het ecosysteem. Geen interview.</div>
         </div>
       </div>
       <div class="tier-item" data-tier="D">
         <div class="tier-dot" style="background:var(--tier-d)"></div>
         <div>
-          <div class="tier-label" style="color:var(--tier-d)">Tier D — Monitor alleen</div>
-          <div class="tier-desc">Geen actie in dit onderzoek. Monitoring via andere kanalen.</div>
+          <div class="tier-label" style="color:var(--tier-d)">Tier D — Monitor</div>
+          <div class="tier-desc">Geen actie, monitoring via andere kanalen.</div>
         </div>
       </div>
     </div>
 
+    <div class="sb-title">Relatietypes</div>
+    <div class="rel-legend">
+      <div class="rel-item">
+        <div class="rel-line opdracht"></div>
+        <span class="rel-label">Opdrachtgeversketen</span>
+      </div>
+      <div class="rel-item">
+        <div class="rel-line info"></div>
+        <span class="rel-label">Informatiestroom</span>
+      </div>
+      <div class="rel-item">
+        <div class="rel-line financieel"></div>
+        <span class="rel-label">Financiële keten</span>
+      </div>
+      <div class="rel-item">
+        <div class="rel-line vergunning"></div>
+        <span class="rel-label">Vergunning / afhankelijkheid</span>
+      </div>
+    </div>
+
+    <div class="sb-title">Relatie tot DV H&I</div>
+    <div class="dv-badge-legend">
+      <span class="dv-badge-ex" style="color:#00d4aa;border-color:#00d4aa;background:rgba(0,212,170,.1)">▶ Opdrachtgever</span>
+      <span class="dv-badge-ex" style="color:#4d9de0;border-color:#4d9de0;background:rgba(77,157,224,.1)">◈ Informant</span>
+      <span class="dv-badge-ex" style="color:#f5a623;border-color:#f5a623;background:rgba(245,166,35,.1)">◆ Financier</span>
+      <span class="dv-badge-ex" style="color:#c77dff;border-color:#c77dff;background:rgba(199,125,255,.1)">⬡ Vergunner</span>
+      <span class="dv-badge-ex" style="color:#7a8fa6;border-color:#3a4a5a;background:rgba(255,255,255,.03)">↔ Partner</span>
+    </div>
+
+    <div class="sb-title">Filter</div>
     <div class="filter-bar" id="filter-bar">
-      <button class="filter-btn active" data-filter="all">Alle <span class="count-badge">34</span></button>
-      <button class="filter-btn" data-filter="A">Tier A <span class="count-badge">8</span></button>
-      <button class="filter-btn" data-filter="B">Tier B <span class="count-badge">13</span></button>
-      <button class="filter-btn" data-filter="C">Tier C <span class="count-badge">9</span></button>
-      <button class="filter-btn" data-filter="D">Tier D <span class="count-badge">4</span></button>
+      <button class="filter-btn active" data-filter="all">Alle</button>
+      <button class="filter-btn" data-filter="A">Tier A</button>
+      <button class="filter-btn" data-filter="B">Tier B</button>
+      <button class="filter-btn" data-filter="C">Tier C</button>
+      <button class="filter-btn" data-filter="D">Tier D</button>
     </div>
 
     <div class="stk-list-title">Stakeholdertypes</div>
     <div class="stk-list" id="stk-list"></div>
 
-    <div class="info-strip">
-      34 stakeholdertypes · 8 regio's · 7 PMC-markten<br>
-      Hover over de onion voor details per type.
+    <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border);font-size:10px;color:var(--text-dim);line-height:1.8;font-family:'DM Mono',monospace">
+      Hover = relaties zichtbaar<br>
+      Badge op node = relatie tot DV H&I<br>
+      34 types · 7 PMC-markten
     </div>
   </div>
 </div>
@@ -820,474 +353,737 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-const STAKEHOLDERS = [
-  // TIER A
-  { nr:1,  name:"Havenbedrijven (publiek)", tier:"A", cat:"Opdrachtgevers",
-    def:"Port of Rotterdam Authority, Port of Amsterdam, Groningen Seaports, North Sea Port, Moerdijk, Den Helder, Zwolle, Brabant.",
-    rel:"Directe opdrachtgever voor infra, kades, terreinen en energievoorziening. Sleutelrol als toegangspoort tot overige stakeholders.",
-    pmcs:["PMC01","PMC09","PMC03","PMC02"] },
-  { nr:2,  name:"Private terminaloperators", tier:"A", cat:"Opdrachtgevers",
-    def:"Exploitanten van bulk-, container-, tank- en RoRo-terminals (Vopak, HES, Koole, ECT, Rhenus).",
-    rel:"Opdrachtgever voor uitbreiding/renovatie terminals. Investeren zelfstandig of via JV.",
-    pmcs:["PMC02","PMC03"] },
-  { nr:3,  name:"Projectontwikkelaars / SPV-eigenaren", tier:"A", cat:"Opdrachtgevers",
-    def:"Initiatiefnemers van energie- en terminalprojecten via Special Purpose Vehicles. Vroeg in de keten aanwezig.",
-    rel:"Vroeg signaleren van projecten (BESS, walstroom, terminals). Eerder in beeld dan havenbedrijf.",
-    pmcs:["PMC09","PMC03","PMC02"] },
-  { nr:4,  name:"Energieproducenten & -ontwikkelaars", tier:"A", cat:"Opdrachtgevers",
-    def:"Ontwikkelaars van BESS, substations, zonne-/windparken (Eneco, Vattenfall, RWE, Shell).",
-    rel:"Primaire opdrachtgever PMC09. Zoeken bouwpartner voor energie-infra op industrieterreinen.",
-    pmcs:["PMC09"] },
-  { nr:5,  name:"Industrie & chemie (EPC)", tier:"A", cat:"Opdrachtgevers",
-    def:"Eigenaren van chemische, petrochemische en farmaceutische installaties (Dow, Shell, Yara, J&J, MSD).",
-    rel:"Opdrachtgever PMC02, PMC04, PMC11. Grote CAPEX; langdurige relaties.",
-    pmcs:["PMC02","PMC04","PMC11"] },
-  { nr:6,  name:"Pharma & biotech clusters", tier:"A", cat:"Opdrachtgevers",
-    def:"Life sciences campussen en bio-hubs met GMP-eisen, cleanrooms en strikte kwaliteitscriteria.",
-    rel:"Aparte aanpak t.o.v. zware industrie. Groeimarkt in havengebieden (NZKG, Moerdijk).",
-    pmcs:["PMC11"] },
-  { nr:7,  name:"Netbeheerders", tier:"A", cat:"Opdrachtgevers",
-    def:"Tennet (hoogspanning), Liander, Stedin, Enexis (distributie).",
-    rel:"Zowel opdrachtgever (substations, bekabeling) als randvoorwaarde. Capaciteitstekort = kans.",
-    pmcs:["PMC09"] },
-  { nr:26, name:"Engineering & adviesbureaus", tier:"A", cat:"Keten",
-    def:"Royal HaskoningDHV, Arcadis, Witteveen+Bos, Iv-Groep. Doen haalbaarheids- en definitiestudies.",
-    rel:"Vroeg in projectcyclus betrokken. Waardevolle bron voor pijplijn en aankomende aanbestedingen.",
-    pmcs:["PMC09","PMC03","PMC02","PMC11","PMC04"] },
+// ── COLORS ───────────────────────────────────────────────────────────────────
+const C = {
+  A: { stroke:'#00d4aa', fill:'rgba(0,212,170,0.10)', text:'#00d4aa', bg:'rgba(0,212,170,0.15)' },
+  B: { stroke:'#f5a623', fill:'rgba(245,166,35,0.08)', text:'#f5a623', bg:'rgba(245,166,35,0.15)' },
+  C: { stroke:'#4d9de0', fill:'rgba(77,157,224,0.07)', text:'#4d9de0', bg:'rgba(77,157,224,0.12)' },
+  D: { stroke:'#8b7fa8', fill:'rgba(139,127,168,0.06)', text:'#8b7fa8', bg:'rgba(139,127,168,0.12)' },
+};
+const REL_C = {
+  opdracht:   '#00d4aa',
+  info:       '#4d9de0',
+  financieel: '#f5a623',
+  vergunning: '#c77dff',
+  partner:    '#7a8fa6',
+};
+const REL_ICONS = { opdracht:'▶', info:'◈', financieel:'◆', vergunning:'⬡', partner:'↔' };
+const REL_LABELS = { opdracht:'Opdrachtgever', info:'Informant', financieel:'Financier', vergunning:'Vergunner', partner:'Partner' };
+const TIER_LABELS = { A:'Interview fase 1', B:'Interview fase 2', C:'In kaart brengen', D:'Monitor' };
 
-  // TIER B
-  { nr:8,  name:"Defensieorganisaties", tier:"B", cat:"Opdrachtgevers",
-    def:"Ministerie van Defensie, Defensie Materieel Organisatie (DMO), NAVO-gerelateerde instanties.",
-    rel:"Opdrachtgever PMC10. Investeringen in havenbeveiliging, infra en logistieke hubs.",
-    pmcs:["PMC10"] },
-  { nr:9,  name:"Scheepvaart / rederijen", tier:"B", cat:"Opdrachtgevers",
-    def:"Eindgebruikers van walstroom, kades en terminal-infra (MSC, Maersk, Hapag-Lloyd, Kotug).",
-    rel:"Stellen eisen aan havenvoorzieningen die projecten initiëren. Indirecte opdrachtgever.",
-    pmcs:["PMC09","PMC03"] },
-  { nr:10, name:"Gemeentes", tier:"B", cat:"Overheid",
-    def:"Gemeenten in havenregio's (Rotterdam, Amsterdam, Terneuzen, Vlissingen, Delfzijl, Moerdijk, Den Helder, Zwolle).",
-    rel:"Vergunningverlener, bestemmingsplan, ruimtelijke ordening. Soms directe opdrachtgever infra.",
-    pmcs:["PMC01"] },
-  { nr:11, name:"Provincies", tier:"B", cat:"Overheid",
-    def:"Zuid-Holland, Noord-Holland, Groningen, Zeeland, Noord-Brabant, Overijssel.",
-    rel:"Regionale subsidies, omgevingsvisie, cofinanciering grote projecten.",
-    pmcs:["PMC01","PMC09"] },
-  { nr:12, name:"Ministerie IenW", tier:"B", cat:"Overheid",
-    def:"Beleid waterwegen, havens, duurzame mobiliteit. Opdrachtgever Rijkswaterstaat.",
-    rel:"Opdrachtgever infra langs waterwegen (PMC01). Beïnvloedt investeringsprogramma's (MIRT).",
-    pmcs:["PMC01"] },
-  { nr:13, name:"Ministerie EZK", tier:"B", cat:"Overheid",
-    def:"Beleid energietransitie, industrie, subsidies (SDE++, IPCEI, waterstof).",
-    rel:"Subsidiestromen beïnvloeden investeringsbesluiten PMC09, PMC04, PMC11.",
-    pmcs:["PMC09","PMC04","PMC11"] },
-  { nr:14, name:"Waterschappen", tier:"B", cat:"Overheid",
-    def:"Beheerder van watergangen, keringen en peilbeheer in havenregio's.",
-    rel:"Vergunningverlener voor kadewerken. Soms zelf investeerder in klimaatadaptatie.",
-    pmcs:["PMC01","PMC02"] },
-  { nr:15, name:"Rijkswaterstaat", tier:"B", cat:"Overheid",
-    def:"Beheerder rijkswaterwegen, sluizen, havens in beheer van het Rijk.",
-    rel:"Directe aanbestedende dienst voor PMC01. Grote projecten via aanbesteding.",
-    pmcs:["PMC01"] },
-  { nr:19, name:"Institutionele investeerders", tier:"B", cat:"Financiers",
-    def:"Pensioenfondsen (APG, PGGM), infra-fondsen (DIF, Meridiam), private equity.",
-    rel:"Financieren grote private terminal- en energieprojecten. Bepalen investeringstempo.",
-    pmcs:["PMC09","PMC03","PMC02"] },
-  { nr:23, name:"Consortiapartners & co-aannemers", tier:"B", cat:"Keten",
-    def:"Aannemers: BAM, Heijmans, Deme, Van Oord, Boskalis, VolkerWessels.",
-    rel:"Potentiële consortiumpartner bij grote werken. Input voor concurrentieanalyse.",
-    pmcs:["PMC01","PMC02","PMC03"] },
-  { nr:25, name:"Aanbestedingsadviseurs", tier:"B", cat:"Keten",
-    def:"Partijen die aanbestedingen begeleiden namens opdrachtgevers (Rebel, AT Osborne).",
-    rel:"Bepalen hoe en wanneer werk in de markt komt. Vroeg signaal van aanbestedingen.",
-    pmcs:["PMC01","PMC09","PMC03"] },
-  { nr:27, name:"Technologieleveranciers", tier:"B", cat:"Keten",
-    def:"Leveranciers van BESS (Fluence, Tesla Energy), elektrolyzers, walstroomsystemen.",
-    rel:"Bepalen technische specificaties PMC09. Inzicht in marktontwikkeling en pijplijn.",
-    pmcs:["PMC09"] },
-  { nr:29, name:"Brancheorganisaties", tier:"B", cat:"Kennis",
-    def:"Deltalinqs (Rotterdam), VNPI, NL Maritiem, Koninklijke Schuttevaer.",
-    rel:"Netwerk- en lobbyorganisaties. Bron voor marktdata, trends en contacten.",
-    pmcs:["PMC01","PMC02","PMC03","PMC09"] },
-  { nr:30, name:"Kennisinstellingen & TNO", tier:"B", cat:"Kennis",
-    def:"TNO, Deltares, TU Delft, Wageningen UR, Marin.",
-    rel:"Vroeg betrokken bij innovatieve projecten. Signaleren toekomstige marktontwikkelingen.",
-    pmcs:["PMC04","PMC09","PMC11"] },
-  { nr:9,  name:"Scheepvaart & rederijen", tier:"B", cat:"Keten",
-    def:"MSC, Maersk, Hapag-Lloyd. Eindgebruikers walstroom en kade-infra.",
-    rel:"Stellen eisen die walstroom en kade-projecten aanjagen.",
-    pmcs:["PMC09","PMC03"] },
+// ── STAKEHOLDERS ─────────────────────────────────────────────────────────────
+// dvRel: relatie van deze stakeholder NAAR DV H&I
+// relations: array van { to: <nr>, type: 'opdracht'|'info'|'financieel'|'vergunning'|'partner' }
+const STK = [
+  // ── TIER A ──────────────────────────────────────────────────────────────
+  { nr:1,  name:'Havenbedrijven (publiek)', tier:'A', cat:'Opdrachtgevers',
+    dvRel:'opdracht',
+    def:'Port of Rotterdam, Amsterdam, Groningen Seaports, North Sea Port, Moerdijk, Den Helder, Zwolle, Brabant.',
+    rel:'Directe opdrachtgever voor infra, kades, terreinen en energievoorziening. Sleutelrol als toegangspoort tot overige stakeholders.',
+    pmcs:['PMC01','PMC09','PMC03','PMC02'],
+    relations:[
+      {to:10, type:'opdracht'}, {to:11, type:'opdracht'},
+      {to:18, type:'financieel'}, {to:7, type:'info'},
+      {to:15, type:'vergunning'}, {to:26, type:'info'},
+    ]
+  },
+  { nr:2,  name:'Private terminaloperators', tier:'A', cat:'Opdrachtgevers',
+    dvRel:'opdracht',
+    def:'Exploitanten van bulk-, container-, tank- en RoRo-terminals (Vopak, HES, Koole, ECT, Rhenus).',
+    rel:'Opdrachtgever voor uitbreiding/renovatie terminals. Investeren zelfstandig of via JV.',
+    pmcs:['PMC02','PMC03'],
+    relations:[
+      {to:19, type:'financieel'}, {to:21, type:'financieel'},
+      {to:1,  type:'info'}, {to:3, type:'opdracht'},
+      {to:9,  type:'info'},
+    ]
+  },
+  { nr:3,  name:'Projectontwikkelaars / SPV', tier:'A', cat:'Opdrachtgevers',
+    dvRel:'opdracht',
+    def:'Initiatiefnemers van energie- en terminalprojecten via Special Purpose Vehicles.',
+    rel:'Vroeg signaleren van projecten (BESS, walstroom, terminals).',
+    pmcs:['PMC09','PMC03','PMC02'],
+    relations:[
+      {to:19, type:'financieel'}, {to:21, type:'financieel'},
+      {to:20, type:'financieel'}, {to:4, type:'partner'},
+      {to:26, type:'info'},
+    ]
+  },
+  { nr:4,  name:'Energieproducenten & -ontwikkelaars', tier:'A', cat:'Opdrachtgevers',
+    dvRel:'opdracht',
+    def:'Ontwikkelaars BESS, substations, zonne-/windparken (Eneco, Vattenfall, RWE, Shell).',
+    rel:'Primaire opdrachtgever PMC09. Zoeken bouwpartner voor energie-infra.',
+    pmcs:['PMC09'],
+    relations:[
+      {to:7,  type:'info'}, {to:13, type:'info'},
+      {to:19, type:'financieel'}, {to:27, type:'info'},
+      {to:3,  type:'partner'},
+    ]
+  },
+  { nr:5,  name:'Industrie & chemie (EPC)', tier:'A', cat:'Opdrachtgevers',
+    dvRel:'opdracht',
+    def:'Eigenaren van chemische, petrochemische en farmaceutische installaties (Dow, Shell, Yara, J&J, MSD).',
+    rel:'Opdrachtgever PMC02, PMC04, PMC11. Grote CAPEX; langdurige relaties.',
+    pmcs:['PMC02','PMC04','PMC11'],
+    relations:[
+      {to:21, type:'financieel'}, {to:16, type:'vergunning'},
+      {to:26, type:'info'}, {to:13, type:'info'},
+    ]
+  },
+  { nr:6,  name:'Pharma & biotech clusters', tier:'A', cat:'Opdrachtgevers',
+    dvRel:'opdracht',
+    def:'Life sciences campussen en bio-hubs met GMP-eisen, cleanrooms en strikte kwaliteitscriteria.',
+    rel:'Groeimarkt in havengebieden (NZKG, Moerdijk).',
+    pmcs:['PMC11'],
+    relations:[
+      {to:13, type:'info'}, {to:16, type:'vergunning'},
+      {to:31, type:'financieel'}, {to:30, type:'info'},
+    ]
+  },
+  { nr:7,  name:'Netbeheerders', tier:'A', cat:'Opdrachtgevers',
+    dvRel:'opdracht',
+    def:'TenneT (hoogspanning), Liander, Stedin, Enexis.',
+    rel:'Zowel opdrachtgever (substations, bekabeling) als randvoorwaarde. Capaciteitstekort = kans.',
+    pmcs:['PMC09'],
+    relations:[
+      {to:12, type:'info'}, {to:4, type:'info'},
+      {to:11, type:'info'}, {to:27, type:'info'},
+    ]
+  },
+  { nr:26, name:'Engineering & adviesbureaus', tier:'A', cat:'Keten',
+    dvRel:'info',
+    def:'Royal HaskoningDHV, Arcadis, Witteveen+Bos, Iv-Groep.',
+    rel:'Vroeg in projectcyclus betrokken. Waardevolle bron voor pijplijn en aankomende aanbestedingen.',
+    pmcs:['PMC09','PMC03','PMC02','PMC11','PMC04'],
+    relations:[
+      {to:1,  type:'info'}, {to:5,  type:'info'},
+      {to:25, type:'info'}, {to:30, type:'info'},
+    ]
+  },
 
-  // TIER C
-  { nr:16, name:"Omgevingsdiensten", tier:"C", cat:"Overheid",
-    def:"DCMR (Rijnmond), OZHZ, Veiligheidsregio's. Verlenen milieuvergunningen.",
-    rel:"Beïnvloeden doorlooptijd en haalbaarheid van projecten.",
-    pmcs:["PMC02","PMC04","PMC11"] },
-  { nr:17, name:"Europese instellingen", tier:"C", cat:"Overheid",
-    def:"DG MOVE, DG Energy, CINEA — beheren CEF, Horizon, IPCEI.",
-    rel:"Bij CEF-gefinancierde projecten directe invloed op scope en timing.",
-    pmcs:["PMC09","PMC04"] },
-  { nr:18, name:"Aandeelhouders havenbedrijven", tier:"C", cat:"Financiers",
-    def:"Gemeenten/staat als aandeelhouder (bijv. gemeente Rotterdam & Staat bij PoR).",
-    rel:"Beïnvloeden investeringsagenda bij publieke havenbedrijven.",
-    pmcs:["PMC01","PMC09"] },
-  { nr:20, name:"ESG-investeerders", tier:"C", cat:"Financiers",
-    def:"Impactfondsen die ESG-criteria stellen aan walstroom, BESS en klimaatadaptatie.",
-    rel:"Sturen scope van duurzame infra via eisen aan projectontwikkelaars.",
-    pmcs:["PMC09"] },
-  { nr:21, name:"Banken & projectfinanciers", tier:"C", cat:"Financiers",
-    def:"ING, ABN AMRO, Rabobank, EIB (Europese Investeringsbank).",
-    rel:"Projectfinanciers van BESS, terminals en industriële installaties.",
-    pmcs:["PMC09","PMC03","PMC02"] },
-  { nr:24, name:"Gespecialiseerde onderaannemers", tier:"C", cat:"Keten",
-    def:"Electrotechniek, fundering, staalconstructie, isolatie.",
-    rel:"Schaarse capaciteit in de markt. Vroegtijdig binden = concurrentievoordeel.",
-    pmcs:["PMC01","PMC02","PMC09"] },
-  { nr:28, name:"Leasemaatschappijen / asset-eigenaren", tier:"C", cat:"Keten",
-    def:"Eigenaren terminalequipment (kranen, AGV's, straddle carriers).",
-    rel:"Civiele aanpassingen aan terminals volgen hun investeringsbeslissingen.",
-    pmcs:["PMC03"] },
-  { nr:31, name:"Nationale subsidieprogramma's", tier:"C", cat:"Kennis",
-    def:"NZKG-programma, MIRT, Regio Deals, SDE++, IPCEI Hydrogen.",
-    rel:"Subsidies bepalen tijdshorizon en haalbaarheid van grote projecten.",
-    pmcs:["PMC09","PMC04","PMC11"] },
+  // ── TIER B ──────────────────────────────────────────────────────────────
+  { nr:8,  name:'Defensieorganisaties', tier:'B', cat:'Opdrachtgevers',
+    dvRel:'opdracht',
+    def:'Ministerie van Defensie, DMO, NAVO-gerelateerde instanties.',
+    rel:'Opdrachtgever PMC10. Investeringen in havenbeveiliging, infra en logistieke hubs.',
+    pmcs:['PMC10'],
+    relations:[
+      {to:12, type:'info'}, {to:10, type:'vergunning'},
+      {to:22, type:'info'},
+    ]
+  },
+  { nr:9,  name:'Scheepvaart & rederijen', tier:'B', cat:'Opdrachtgevers',
+    dvRel:'info',
+    def:'MSC, Maersk, Hapag-Lloyd. Eindgebruikers walstroom en kade-infra.',
+    rel:'Stellen eisen die walstroom- en kadeprojecten aanjagen.',
+    pmcs:['PMC09','PMC03'],
+    relations:[
+      {to:1,  type:'info'}, {to:2, type:'info'},
+    ]
+  },
+  { nr:10, name:'Gemeentes', tier:'B', cat:'Overheid',
+    dvRel:'vergunning',
+    def:'Rotterdam, Amsterdam, Terneuzen, Vlissingen, Delfzijl, Moerdijk, Den Helder, Zwolle.',
+    rel:'Vergunningverlener, bestemmingsplan, ruimtelijke ordening.',
+    pmcs:['PMC01'],
+    relations:[
+      {to:11, type:'info'}, {to:16, type:'vergunning'},
+      {to:18, type:'financieel'},
+    ]
+  },
+  { nr:11, name:'Provincies', tier:'B', cat:'Overheid',
+    dvRel:'vergunning',
+    def:'Zuid-Holland, Noord-Holland, Groningen, Zeeland, Noord-Brabant, Overijssel.',
+    rel:'Regionale subsidies, omgevingsvisie, cofinanciering grote projecten.',
+    pmcs:['PMC01','PMC09'],
+    relations:[
+      {to:12, type:'info'}, {to:10, type:'info'},
+      {to:31, type:'financieel'},
+    ]
+  },
+  { nr:12, name:'Ministerie IenW', tier:'B', cat:'Overheid',
+    dvRel:'vergunning',
+    def:'Beleid waterwegen, havens, duurzame mobiliteit.',
+    rel:'Opdrachtgever infra langs waterwegen (PMC01). Beïnvloedt investeringsprogramma\'s (MIRT).',
+    pmcs:['PMC01'],
+    relations:[
+      {to:15, type:'opdracht'}, {to:11, type:'info'},
+      {to:31, type:'financieel'},
+    ]
+  },
+  { nr:13, name:'Ministerie EZK', tier:'B', cat:'Overheid',
+    dvRel:'info',
+    def:'Beleid energietransitie, industrie, subsidies (SDE++, IPCEI, waterstof).',
+    rel:'Subsidiestromen beïnvloeden investeringsbesluiten PMC09, PMC04, PMC11.',
+    pmcs:['PMC09','PMC04','PMC11'],
+    relations:[
+      {to:31, type:'financieel'}, {to:17, type:'info'},
+      {to:4,  type:'info'}, {to:7, type:'info'},
+    ]
+  },
+  { nr:14, name:'Waterschappen', tier:'B', cat:'Overheid',
+    dvRel:'vergunning',
+    def:'Beheerder watergangen, keringen en peilbeheer in havenregio\'s.',
+    rel:'Vergunningverlener voor kadewerken.',
+    pmcs:['PMC01','PMC02'],
+    relations:[
+      {to:10, type:'info'}, {to:15, type:'info'},
+    ]
+  },
+  { nr:15, name:'Rijkswaterstaat', tier:'B', cat:'Overheid',
+    dvRel:'opdracht',
+    def:'Beheerder rijkswaterwegen, sluizen, havens in beheer van het Rijk.',
+    rel:'Directe aanbestedende dienst voor PMC01.',
+    pmcs:['PMC01'],
+    relations:[
+      {to:12, type:'info'}, {to:14, type:'info'},
+      {to:25, type:'info'},
+    ]
+  },
+  { nr:19, name:'Institutionele investeerders', tier:'B', cat:'Financiers',
+    dvRel:'financieel',
+    def:'Pensioenfondsen (APG, PGGM), infra-fondsen (DIF, Meridiam), private equity.',
+    rel:'Financieren grote private terminal- en energieprojecten.',
+    pmcs:['PMC09','PMC03','PMC02'],
+    relations:[
+      {to:3,  type:'financieel'}, {to:2, type:'financieel'},
+      {to:21, type:'financieel'}, {to:20, type:'partner'},
+    ]
+  },
+  { nr:23, name:'Consortiapartners & co-aannemers', tier:'B', cat:'Keten',
+    dvRel:'partner',
+    def:'BAM, Heijmans, DEME, Van Oord, Boskalis, VolkerWessels.',
+    rel:'Potentiële consortiumpartner bij grote werken.',
+    pmcs:['PMC01','PMC02','PMC03'],
+    relations:[
+      {to:25, type:'info'}, {to:26, type:'info'},
+    ]
+  },
+  { nr:25, name:'Aanbestedingsadviseurs', tier:'B', cat:'Keten',
+    dvRel:'info',
+    def:'Rebel, AT Osborne. Begeleiden aanbestedingen namens opdrachtgevers.',
+    rel:'Bepalen hoe en wanneer werk in de markt komt.',
+    pmcs:['PMC01','PMC09','PMC03'],
+    relations:[
+      {to:1,  type:'info'}, {to:15, type:'info'},
+      {to:26, type:'info'},
+    ]
+  },
+  { nr:27, name:'Technologieleveranciers', tier:'B', cat:'Keten',
+    dvRel:'info',
+    def:'Leveranciers BESS (Fluence, Tesla Energy), elektrolyzers, walstroomsystemen.',
+    rel:'Bepalen technische specificaties PMC09.',
+    pmcs:['PMC09'],
+    relations:[
+      {to:4,  type:'info'}, {to:7, type:'info'},
+    ]
+  },
+  { nr:29, name:'Brancheorganisaties', tier:'B', cat:'Kennis',
+    dvRel:'info',
+    def:'Deltalinqs (Rotterdam), VNPI, NL Maritiem, Koninklijke Schuttevaer.',
+    rel:'Netwerk- en lobbyorganisaties. Bron voor marktdata en trends.',
+    pmcs:['PMC01','PMC02','PMC03','PMC09'],
+    relations:[
+      {to:1,  type:'info'}, {to:30, type:'info'},
+    ]
+  },
+  { nr:30, name:'Kennisinstellingen & TNO', tier:'B', cat:'Kennis',
+    dvRel:'info',
+    def:'TNO, Deltares, TU Delft, Wageningen UR, Marin.',
+    rel:'Signaleren toekomstige marktontwikkelingen.',
+    pmcs:['PMC04','PMC09','PMC11'],
+    relations:[
+      {to:13, type:'info'}, {to:17, type:'info'},
+    ]
+  },
 
-  // TIER D
-  { nr:22, name:"Verzekeraars", tier:"D", cat:"Financiers",
-    def:"Partijen die bouwrisico's beoordelen bij grote infra- en industrieprojecten.",
-    rel:"Stellen eisen aan bouwkwaliteit. Relevant bij BESS en CO₂-opslag.",
-    pmcs:["PMC09","PMC04"] },
-  { nr:32, name:"Havenpolitie / Douane", tier:"D", cat:"Overheid",
-    def:"Havenpolitie, Douane, NVWA. Operationele toezichthouders in havengebied.",
-    rel:"Stellen randvoorwaarden bij defensie- en pharmaprojecten.",
-    pmcs:["PMC10","PMC11"] },
-  { nr:33, name:"Maatschappelijke organisaties", tier:"D", cat:"Omgeving",
-    def:"Milieuorganisaties, bewonersgroepen, actiegroepen bij havenprojecten.",
-    rel:"Kunnen projecten vertragen via bezwaar (NIMBY). Risicofactor bij CO₂-opslag.",
-    pmcs:["PMC04","PMC09"] },
-  { nr:34, name:"Media & communicatie", tier:"D", cat:"Omgeving",
-    def:"Vakpers (Port Technology, De Schuttevaer), regionale media, PR-bureaus.",
-    rel:"Signaleren projectaankondigingen en marktnieuws.",
-    pmcs:["PMC01","PMC09"] },
+  // ── TIER C ──────────────────────────────────────────────────────────────
+  { nr:16, name:'Omgevingsdiensten', tier:'C', cat:'Overheid',
+    dvRel:'vergunning',
+    def:'DCMR (Rijnmond), OZHZ, Veiligheidsregio\'s. Verlenen milieuvergunningen.',
+    rel:'Beïnvloeden doorlooptijd en haalbaarheid van projecten.',
+    pmcs:['PMC02','PMC04','PMC11'],
+    relations:[
+      {to:10, type:'vergunning'}, {to:14, type:'info'},
+    ]
+  },
+  { nr:17, name:'Europese instellingen', tier:'C', cat:'Overheid',
+    dvRel:'financieel',
+    def:'DG MOVE, DG Energy, CINEA — beheren CEF, Horizon, IPCEI.',
+    rel:'Bij CEF-gefinancierde projecten directe invloed op scope en timing.',
+    pmcs:['PMC09','PMC04'],
+    relations:[
+      {to:13, type:'financieel'}, {to:31, type:'financieel'},
+    ]
+  },
+  { nr:18, name:'Aandeelhouders havenbedrijven', tier:'C', cat:'Financiers',
+    dvRel:'financieel',
+    def:'Gemeenten/staat als aandeelhouder (bijv. gemeente Rotterdam & Staat bij PoR).',
+    rel:'Beïnvloeden investeringsagenda bij publieke havenbedrijven.',
+    pmcs:['PMC01','PMC09'],
+    relations:[
+      {to:1,  type:'financieel'}, {to:10, type:'info'},
+    ]
+  },
+  { nr:20, name:'ESG-investeerders', tier:'C', cat:'Financiers',
+    dvRel:'financieel',
+    def:'Impactfondsen die ESG-criteria stellen aan walstroom, BESS en klimaatadaptatie.',
+    rel:'Sturen scope van duurzame infra via eisen aan projectontwikkelaars.',
+    pmcs:['PMC09'],
+    relations:[
+      {to:3,  type:'financieel'}, {to:19, type:'partner'},
+    ]
+  },
+  { nr:21, name:'Banken & projectfinanciers', tier:'C', cat:'Financiers',
+    dvRel:'financieel',
+    def:'ING, ABN AMRO, Rabobank, EIB.',
+    rel:'Projectfinanciers van BESS, terminals en industriële installaties.',
+    pmcs:['PMC09','PMC03','PMC02'],
+    relations:[
+      {to:3,  type:'financieel'}, {to:19, type:'partner'},
+      {to:2,  type:'financieel'},
+    ]
+  },
+  { nr:24, name:'Gespecialiseerde onderaannemers', tier:'C', cat:'Keten',
+    dvRel:'partner',
+    def:'Electrotechniek, fundering, staalconstructie, isolatie.',
+    rel:'Schaarse capaciteit. Vroegtijdig binden = concurrentievoordeel.',
+    pmcs:['PMC01','PMC02','PMC09'],
+    relations:[
+      {to:23, type:'partner'},
+    ]
+  },
+  { nr:28, name:'Leasemij. / asset-eigenaren', tier:'C', cat:'Keten',
+    dvRel:'info',
+    def:'Eigenaren terminalequipment (kranen, AGV\'s, straddle carriers).',
+    rel:'Civiele aanpassingen volgen hun investeringsbeslissingen.',
+    pmcs:['PMC03'],
+    relations:[
+      {to:2,  type:'info'},
+    ]
+  },
+  { nr:31, name:'Nationale subsidieprogramma\'s', tier:'C', cat:'Kennis',
+    dvRel:'financieel',
+    def:'NZKG-programma, MIRT, Regio Deals, SDE++, IPCEI Hydrogen.',
+    rel:'Subsidies bepalen tijdshorizon en haalbaarheid van grote projecten.',
+    pmcs:['PMC09','PMC04','PMC11'],
+    relations:[
+      {to:13, type:'financieel'}, {to:17, type:'financieel'},
+      {to:4,  type:'financieel'},
+    ]
+  },
+
+  // ── TIER D ──────────────────────────────────────────────────────────────
+  { nr:22, name:'Verzekeraars', tier:'D', cat:'Financiers',
+    dvRel:'info',
+    def:'Beoordelen bouwrisico\'s bij grote infra- en industrieprojecten.',
+    rel:'Stellen eisen aan bouwkwaliteit bij BESS en CO₂-opslag.',
+    pmcs:['PMC09','PMC04'],
+    relations:[
+      {to:19, type:'info'},
+    ]
+  },
+  { nr:32, name:'Havenpolitie / Douane', tier:'D', cat:'Overheid',
+    dvRel:'vergunning',
+    def:'Havenpolitie, Douane, NVWA. Operationele toezichthouders.',
+    rel:'Stellen randvoorwaarden bij defensie- en pharmaprojecten.',
+    pmcs:['PMC10','PMC11'],
+    relations:[
+      {to:10, type:'vergunning'},
+    ]
+  },
+  { nr:33, name:'Maatschappelijke organisaties', tier:'D', cat:'Omgeving',
+    dvRel:'info',
+    def:'Milieuorganisaties, bewonersgroepen, actiegroepen.',
+    rel:'Kunnen projecten vertragen via bezwaar. Risicofactor bij CO₂-opslag.',
+    pmcs:['PMC04','PMC09'],
+    relations:[
+      {to:10, type:'info'}, {to:16, type:'info'},
+    ]
+  },
+  { nr:34, name:'Media & communicatie', tier:'D', cat:'Omgeving',
+    dvRel:'info',
+    def:'Port Technology, De Schuttevaer, regionale media.',
+    rel:'Signaleren projectaankondigingen en marktnieuws.',
+    pmcs:['PMC01','PMC09'],
+    relations:[
+      {to:29, type:'info'},
+    ]
+  },
 ];
 
-const COLORS = {
-  A: { stroke: '#00d4aa', fill: 'rgba(0,212,170,0.08)', text: '#00d4aa', glow: 'rgba(0,212,170,0.4)', badge_bg: 'rgba(0,212,170,0.15)' },
-  B: { stroke: '#f5a623', fill: 'rgba(245,166,35,0.07)', text: '#f5a623', glow: 'rgba(245,166,35,0.3)', badge_bg: 'rgba(245,166,35,0.15)' },
-  C: { stroke: '#4d9de0', fill: 'rgba(77,157,224,0.06)', text: '#4d9de0', glow: 'rgba(77,157,224,0.2)', badge_bg: 'rgba(77,157,224,0.15)' },
-  D: { stroke: '#8b7fa8', fill: 'rgba(139,127,168,0.05)', text: '#8b7fa8', glow: 'rgba(139,127,168,0.15)', badge_bg: 'rgba(139,127,168,0.15)' },
-};
+// ── BUILD LOOKUP ─────────────────────────────────────────────────────────────
+const BY_NR = {};
+STK.forEach(s => { BY_NR[s.nr] = s; });
 
-const TIER_LABELS = {
-  A: 'Interview fase 1',
-  B: 'Interview fase 2',
-  C: 'In kaart brengen',
-  D: 'Monitor',
-};
+// ── SVG SETUP ────────────────────────────────────────────────────────────────
+const svg = document.getElementById('onion-svg');
+const NS  = 'http://www.w3.org/2000/svg';
+const CX = 380, CY = 360;
+const RADII = { A:100, B:190, C:275, D:345 };
+const RING_W = { A:82, B:78, C:72, D:56 };
 
-const svg = document.getElementById('onion');
-const NS = 'http://www.w3.org/2000/svg';
-const CX = 360, CY = 340;
-const RADII = { A: 100, B: 185, C: 265, D: 330 };
-const RING_W = { A: 80, B: 76, C: 74, D: 55 };
-
-function el(tag, attrs = {}) {
+function svgEl(tag, attrs={}) {
   const e = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  for(const[k,v] of Object.entries(attrs)) e.setAttribute(k,v);
   return e;
 }
-
-function mktext(content, attrs = {}) {
-  const e = document.createElementNS(NS, 'text');
-  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
-  e.textContent = content;
-  return e;
+function svgTxt(txt, attrs={}) {
+  const e = svgEl('text', attrs); e.textContent = txt; return e;
 }
 
-// Draw rings
-function drawRings() {
-  // Outer glow for each ring
-  const defs = el('defs');
-
-  ['A','B','C','D'].forEach(tier => {
-    const r = RADII[tier] + RING_W[tier]/2;
-    const filter = el('filter', { id: `glow-${tier}`, x: '-20%', y: '-20%', width: '140%', height: '140%' });
-    const feGlow = el('feGaussianBlur', { stdDeviation: '3', result: 'blur' });
-    const feComp = el('feComposite', { in: 'SourceGraphic', in2: 'blur', operator: 'over' });
-    filter.appendChild(feGlow);
-    filter.appendChild(feComp);
-    defs.appendChild(filter);
+// ── DEFS: arrowheads ─────────────────────────────────────────────────────────
+const defs = svgEl('defs');
+Object.entries(REL_C).forEach(([type, color]) => {
+  const marker = svgEl('marker', {
+    id:`arr-${type}`, markerWidth:'8', markerHeight:'6',
+    refX:'7', refY:'3', orient:'auto',
   });
-  svg.appendChild(defs);
+  const path = svgEl('path', { d:'M0,0 L0,6 L8,3 z', fill:color, opacity:'.85' });
+  marker.appendChild(path);
+  defs.appendChild(marker);
+});
+svg.appendChild(defs);
 
-  // Draw rings from outside in
+// ── LAYER GROUPS ─────────────────────────────────────────────────────────────
+const ringLayer  = svgEl('g', { id:'ring-layer' });
+const edgeLayer  = svgEl('g', { id:'edge-layer' });
+const nodeLayer  = svgEl('g', { id:'node-layer' });
+svg.appendChild(ringLayer);
+svg.appendChild(edgeLayer);
+svg.appendChild(nodeLayer);
+
+// ── DRAW RINGS ───────────────────────────────────────────────────────────────
+function drawRings() {
+  // outer glow rings (decorative)
   ['D','C','B','A'].forEach(tier => {
     const r = RADII[tier] + RING_W[tier];
-    const c = COLORS[tier];
-    const circle = el('circle', {
-      cx: CX, cy: CY, r: r,
-      fill: c.fill,
-      stroke: c.stroke,
-      'stroke-width': '1',
-      'stroke-opacity': '0.4',
-    });
-    svg.appendChild(circle);
+    const c = C[tier];
+    ringLayer.appendChild(svgEl('circle', {
+      cx:CX, cy:CY, r,
+      fill: c.fill, stroke: c.stroke,
+      'stroke-width':'1', 'stroke-opacity':'.35',
+    }));
   });
 
-  // Inner core
-  const core = el('circle', { cx: CX, cy: CY, r: RADII.A - 10,
-    fill: 'rgba(26,74,138,0.15)', stroke: '#1a4a8a', 'stroke-width': '1.5', 'stroke-opacity': '0.7' });
-  svg.appendChild(core);
+  // core DV circle
+  ringLayer.appendChild(svgEl('circle', {
+    cx:CX, cy:CY, r:RADII.A - 14,
+    fill:'rgba(26,74,138,0.18)', stroke:'#1a4a8a',
+    'stroke-width':'1.8', 'stroke-opacity':'.8',
+  }));
 
-  // Core label
-  const coreLabel = mktext('DV H&I', {
-    x: CX, y: CY - 10,
-    'text-anchor': 'middle',
-    fill: '#4d9de0',
-    'font-family': 'Syne, sans-serif',
-    'font-size': '13',
-    'font-weight': '700',
-  });
-  svg.appendChild(coreLabel);
-  const coreSub = mktext('Haven & Industrie', {
-    x: CX, y: CY + 8,
-    'text-anchor': 'middle',
-    fill: 'rgba(77,157,224,0.6)',
-    'font-family': 'DM Sans, sans-serif',
-    'font-size': '9',
-  });
-  svg.appendChild(coreSub);
+  // core text
+  ringLayer.appendChild(svgTxt('DV H&I', {
+    x:CX, y:CY-8, 'text-anchor':'middle',
+    fill:'#4d9de0', 'font-family':'Syne, sans-serif',
+    'font-size':'14', 'font-weight':'700',
+  }));
+  ringLayer.appendChild(svgTxt('Haven & Industrie', {
+    x:CX, y:CY+9, 'text-anchor':'middle',
+    fill:'rgba(77,157,224,0.55)', 'font-family':'DM Sans, sans-serif', 'font-size':'9',
+  }));
 
-  // Tier ring labels (top of each ring)
-  const ringLabelAngles = { A: -80, B: -85, C: -88, D: -90 };
+  // tier ring labels
   ['A','B','C','D'].forEach(tier => {
-    const mid = RADII[tier] + RING_W[tier]/2;
-    const angle = ringLabelAngles[tier] * Math.PI / 180;
-    const lx = CX + mid * Math.cos(angle);
-    const ly = CY + mid * Math.sin(angle);
-    const label = mktext(`Tier ${tier}`, {
-      x: lx, y: ly - 4,
-      'text-anchor': 'middle',
-      fill: COLORS[tier].text,
-      'font-family': 'Syne, sans-serif',
-      'font-size': '9',
-      'font-weight': '700',
-      opacity: '0.7',
-    });
-    svg.appendChild(label);
+    const mid = RADII[tier] + RING_W[tier]*0.5;
+    const ang = -82 * Math.PI/180;
+    const lx = CX + mid*Math.cos(ang);
+    const ly = CY + mid*Math.sin(ang);
+    ringLayer.appendChild(svgTxt(`Tier ${tier}`, {
+      x:lx, y:ly-3, 'text-anchor':'middle',
+      fill:C[tier].text, 'font-family':'Syne, sans-serif',
+      'font-size':'9', 'font-weight':'700', opacity:'.65',
+    }));
   });
 }
 
-// Place nodes in rings
-function placeNodes(filter = 'all') {
-  // Remove old nodes
-  svg.querySelectorAll('.onion-node').forEach(n => n.remove());
+// ── NODE PLACEMENT ───────────────────────────────────────────────────────────
+const NODE_POS = {}; // nr -> {x,y}
+
+function placeNodes(filterTier='all') {
+  nodeLayer.innerHTML = '';
+  edgeLayer.innerHTML = '';
+  NODE_POS_RESET();
 
   const tiers = ['A','B','C','D'];
-  const grouped = {};
-  tiers.forEach(t => {
-    grouped[t] = STAKEHOLDERS.filter(s => s.tier === t && (filter === 'all' || s.tier === filter));
-  });
-
   tiers.forEach(tier => {
-    const items = grouped[tier];
-    if (!items.length) return;
-    const c = COLORS[tier];
+    const items = STK.filter(s => s.tier===tier && (filterTier==='all' || s.tier===filterTier));
+    if(!items.length) return;
+    const c = C[tier];
     const baseR = RADII[tier];
     const w = RING_W[tier];
 
     items.forEach((stk, i) => {
       const total = items.length;
-      // Spread from 20deg to 340deg to avoid top overlap with labels
-      const startAngle = -160;
-      const spread = 300;
-      const angleDeg = total === 1 ? 0 : startAngle + (spread / (total - 1)) * i;
-      const angle = angleDeg * Math.PI / 180;
+      const startDeg = -160;
+      const spreadDeg = 300;
+      const deg = total===1 ? 0 : startDeg + (spreadDeg/(total-1))*i;
+      const rad = deg * Math.PI/180;
+      const rVariance = (i%3-1) * (w*0.18);
+      const r = baseR + w*0.45 + rVariance;
+      const x = CX + r*Math.cos(rad);
+      const y = CY + r*Math.sin(rad);
+      NODE_POS[stk.nr] = {x, y};
 
-      // Vary radius within ring
-      const rVariance = (i % 3 - 1) * (w * 0.2);
-      const r = baseR + w * 0.45 + rVariance;
-
-      const x = CX + r * Math.cos(angle);
-      const y = CY + r * Math.sin(angle);
-
-      // Node group
-      const g = document.createElementNS(NS, 'g');
-      g.setAttribute('class', 'onion-node');
+      // ── node group ──
+      const g = document.createElementNS(NS,'g');
+      g.setAttribute('class','onion-node');
       g.setAttribute('data-nr', stk.nr);
-      g.setAttribute('data-tier', stk.tier);
 
-      // Background pill
-      const textLen = stk.name.length;
-      const pill_w = Math.min(Math.max(textLen * 6.2 + 16, 60), 110);
-      const pill_h = 20;
+      // pill background
+      const nameLen = stk.name.length;
+      const pw = Math.min(Math.max(nameLen*5.8+20, 62), 112);
+      const ph = 20;
 
-      const pill = el('rect', {
-        x: x - pill_w/2, y: y - pill_h/2,
-        width: pill_w, height: pill_h,
-        rx: 10,
-        fill: c.badge_bg,
-        stroke: c.stroke,
-        'stroke-width': '0.8',
-        'stroke-opacity': '0.6',
+      const pill = svgEl('rect', {
+        x: x-pw/2, y: y-ph/2, width:pw, height:ph, rx:10,
+        fill: c.bg, stroke: c.stroke,
+        'stroke-width':'0.8', 'stroke-opacity':'0.6',
+        class:'node-pill',
       });
       g.appendChild(pill);
 
-      // Tier indicator dot
-      const dot = el('circle', {
-        cx: x - pill_w/2 + 7, cy: y,
-        r: 3,
-        fill: c.stroke,
+      // tier dot
+      g.appendChild(svgEl('circle', {
+        cx: x-pw/2+7, cy: y, r:'3', fill:c.stroke,
+      }));
+
+      // name
+      const lbl = svgTxt(stk.name, {
+        x: x-pw/2+14, y: y,
+        'dominant-baseline':'central',
+        fill:'rgba(232,237,242,0.9)',
+        'font-family':'DM Sans, sans-serif',
+        'font-size':'9.2', 'font-weight':'400',
       });
-      g.appendChild(dot);
+      g.appendChild(lbl);
 
-      // Label
-      const label = mktext(stk.name, {
-        x: x - pill_w/2 + 14, y: y,
-        'dominant-baseline': 'central',
-        fill: 'rgba(232,237,242,0.9)',
-        'font-family': 'DM Sans, sans-serif',
-        'font-size': '9.5',
-        'font-weight': '400',
-      });
-      g.appendChild(label);
+      // DV relation badge (bottom-right of pill)
+      const dvC = REL_C[stk.dvRel] || '#7a8fa6';
+      const dvIcon = REL_ICONS[stk.dvRel] || '?';
+      const badgeW = 16;
+      g.appendChild(svgEl('rect', {
+        x: x+pw/2-badgeW-1, y: y+ph/2-1,
+        width: badgeW, height:12, rx:3,
+        fill: dvC, opacity:'.18',
+      }));
+      g.appendChild(svgTxt(dvIcon, {
+        x: x+pw/2-badgeW/2-1, y: y+ph/2+5,
+        'text-anchor':'middle',
+        fill: dvC, 'font-family':'DM Mono, monospace',
+        'font-size':'8', class:'dv-badge',
+      }));
 
-      // Hover events
-      g.addEventListener('mouseenter', (e) => showTooltip(e, stk));
-      g.addEventListener('mousemove', moveTooltip);
-      g.addEventListener('mouseleave', hideTooltip);
-      g.addEventListener('click', () => highlightItem(stk.nr));
+      // events
+      g.addEventListener('mouseenter', e => onHover(e, stk));
+      g.addEventListener('mousemove',  e => { mx=e.clientX; my=e.clientY; posTooltip(); });
+      g.addEventListener('mouseleave', onLeave);
+      g.addEventListener('click', () => onHover(null, stk, true));
 
-      svg.appendChild(g);
+      nodeLayer.appendChild(g);
     });
   });
 }
 
-// Tooltip
-const tooltip = document.getElementById('tooltip');
-let mouseX = 0, mouseY = 0;
+function NODE_POS_RESET() {
+  Object.keys(NODE_POS).forEach(k => delete NODE_POS[k]);
+}
 
-function showTooltip(e, stk) {
-  const c = COLORS[stk.tier];
-  tooltip.innerHTML = `
-    <div class="tt-header">
-      <div class="tt-nr" style="background:${c.badge_bg};color:${c.text}">${stk.nr}</div>
-      <div class="tt-title">${stk.name}</div>
-      <div class="tt-tier-badge" style="color:${c.text};border-color:${c.stroke};background:${c.badge_bg}">
-        ${stk.tier} · ${TIER_LABELS[stk.tier]}
-      </div>
+// ── EDGES ────────────────────────────────────────────────────────────────────
+function showEdges(stk) {
+  edgeLayer.innerHTML = '';
+  const src = NODE_POS[stk.nr];
+  if(!src) return;
+
+  // DV core position
+  const dvX = CX, dvY = CY;
+
+  // 1. Line from node to DV core
+  const dvC = REL_C[stk.dvRel] || '#7a8fa6';
+  const mainLine = buildEdge(src.x, src.y, dvX, dvY, dvC, stk.dvRel, true);
+  edgeLayer.appendChild(mainLine);
+
+  // 2. Lines to related stakeholders
+  (stk.relations||[]).forEach(rel => {
+    const target = BY_NR[rel.to];
+    if(!target) return;
+    const tpos = NODE_POS[rel.to];
+    if(!tpos) return;
+    const line = buildEdge(src.x, src.y, tpos.x, tpos.y, REL_C[rel.type], rel.type, false);
+    edgeLayer.appendChild(line);
+  });
+}
+
+function buildEdge(x1, y1, x2, y2, color, type, toDV=false) {
+  // curved path via midpoint offset
+  const mx = (x1+x2)/2 + (y2-y1)*0.08;
+  const my = (y1+y2)/2 - (x2-x1)*0.08;
+
+  const path = svgEl('path', {
+    d:`M${x1},${y1} Q${mx},${my} ${x2},${y2}`,
+    fill:'none',
+    stroke: color,
+    'stroke-width': toDV ? '1.8' : '1.2',
+    'stroke-dasharray': type==='info' ? '4,3' : type==='vergunning' ? '3,3' : 'none',
+    opacity: toDV ? '0.85' : '0.55',
+    'marker-end': `url(#arr-${type})`,
+    class:'rel-edge',
+  });
+  return path;
+}
+
+function hideEdges() { edgeLayer.innerHTML = ''; }
+
+// ── TOOLTIP ──────────────────────────────────────────────────────────────────
+const tipEl = document.getElementById('tooltip');
+let mx=0, my=0;
+
+function onHover(e, stk, pinned=false) {
+  if(e) { mx=e.clientX; my=e.clientY; }
+  showEdges(stk);
+  highlightNode(stk.nr);
+  buildTooltip(stk);
+  posTooltip();
+  tipEl.classList.add('visible');
+  highlightSidebar(stk.nr);
+}
+
+function onLeave() {
+  hideEdges();
+  tipEl.classList.remove('visible');
+  clearNodeHighlight();
+  clearSidebarHighlight();
+}
+
+function posTooltip() {
+  const tw=330, th=260;
+  let l=mx+16, t=my+16;
+  if(l+tw > window.innerWidth-10)  l = mx-tw-16;
+  if(t+th > window.innerHeight-10) t = my-th-16;
+  tipEl.style.left = l+'px';
+  tipEl.style.top  = t+'px';
+}
+
+function buildTooltip(stk) {
+  const c = C[stk.tier];
+  const dvC = REL_C[stk.dvRel]||'#7a8fa6';
+  const dvIcon = REL_ICONS[stk.dvRel]||'?';
+  const dvLabel = REL_LABELS[stk.dvRel]||'';
+
+  const relRows = (stk.relations||[]).map(rel=>{
+    const t = BY_NR[rel.to];
+    if(!t) return '';
+    return `<div class="tt-rel-row">
+      <div class="tt-rel-dot" style="background:${REL_C[rel.type]}"></div>
+      <span class="tt-rel-type">${rel.type}</span>
+      <span class="tt-rel-to">→ ${t.name}</span>
+    </div>`;
+  }).join('');
+
+  tipEl.style.borderColor = c.stroke;
+  tipEl.innerHTML = `
+    <div class="tt-head">
+      <div class="tt-nr" style="background:${c.bg};color:${c.text}">${stk.nr}</div>
+      <div class="tt-name">${stk.name}</div>
+      <div class="tt-badge" style="color:${c.text};border-color:${c.stroke};background:${c.bg}">${stk.tier} · ${TIER_LABELS[stk.tier]}</div>
     </div>
-    <div class="tt-body">${stk.def}</div>
-    <div class="tt-rel"><strong style="color:rgba(232,237,242,0.7)">Relevantie DV H&I:</strong> ${stk.rel}</div>
-    <div class="tt-row">${stk.pmcs.map(p => `<span class="tt-pmc">${p}</span>`).join('')}</div>
+    <div class="tt-def">${stk.def}</div>
+    <div class="tt-rel-header">Relevantie DV H&I</div>
+    <div class="tt-rel-text">${stk.rel}</div>
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+      <span style="font-size:10px;color:${dvC};font-family:'DM Mono',monospace;background:${dvC}22;border:1px solid ${dvC}44;padding:2px 8px;border-radius:4px">${dvIcon} ${dvLabel}</span>
+      <span style="font-size:9px;color:var(--text-dim)">relatie tot DV H&I</span>
+    </div>
+    ${relRows ? `<div class="tt-rels">${relRows}</div>` : ''}
+    <div class="tt-pmcs">${stk.pmcs.map(p=>`<span class="tt-pmc">${p}</span>`).join('')}</div>
   `;
-  tooltip.style.borderColor = c.stroke;
-  positionTooltip();
-  tooltip.classList.add('visible');
-  highlightSidebarItem(stk.nr);
 }
 
-function positionTooltip() {
-  const tw = 320;
-  const th = 200;
-  let left = mouseX + 16;
-  let top = mouseY + 16;
-  if (left + tw > window.innerWidth - 20) left = mouseX - tw - 16;
-  if (top + th > window.innerHeight - 20) top = mouseY - th - 16;
-  tooltip.style.left = left + 'px';
-  tooltip.style.top = top + 'px';
+// ── NODE HIGHLIGHT ────────────────────────────────────────────────────────────
+function highlightNode(nr) {
+  nodeLayer.querySelectorAll('.onion-node').forEach(g => {
+    const n = parseInt(g.dataset.nr);
+    g.style.opacity = n===nr ? '1' : '0.35';
+    if(n===nr) g.classList.add('active');
+    else g.classList.remove('active');
+  });
 }
-
-function moveTooltip(e) {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-  positionTooltip();
-}
-
-function hideTooltip() {
-  tooltip.classList.remove('visible');
-  document.querySelectorAll('.stk-item').forEach(i => i.classList.remove('highlighted'));
-}
-
-function highlightSidebarItem(nr) {
-  document.querySelectorAll('.stk-item').forEach(i => {
-    i.classList.toggle('highlighted', parseInt(i.dataset.nr) === nr);
-    if (parseInt(i.dataset.nr) === nr) {
-      i.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
+function clearNodeHighlight() {
+  nodeLayer.querySelectorAll('.onion-node').forEach(g => {
+    g.style.opacity='1'; g.classList.remove('active');
   });
 }
 
-function highlightItem(nr) {}
-
-// Sidebar list
-function buildSidebarList(filter = 'all') {
+// ── SIDEBAR LIST ─────────────────────────────────────────────────────────────
+function buildSidebar(filterTier='all') {
   const list = document.getElementById('stk-list');
-  list.innerHTML = '';
-  const items = filter === 'all' ? STAKEHOLDERS : STAKEHOLDERS.filter(s => s.tier === filter);
-  // Deduplicate by name
+  list.innerHTML='';
   const seen = new Set();
-  items.filter(s => {
-    if (seen.has(s.name)) return false;
-    seen.add(s.name); return true;
-  }).forEach(stk => {
-    const c = COLORS[stk.tier];
-    const div = document.createElement('div');
-    div.className = 'stk-item';
-    div.dataset.nr = stk.nr;
-    div.innerHTML = `
-      <span class="stk-tier-dot" style="background:${c.stroke}"></span>
-      <span class="stk-nr" style="color:${c.text}">${stk.tier}</span>
-      <span>${stk.name}</span>
-    `;
-    div.addEventListener('mouseenter', (e) => {
-      mouseX = e.clientX; mouseY = e.clientY;
-      showTooltip(e, stk);
+  STK.filter(s => filterTier==='all' || s.tier===filterTier)
+    .filter(s => { if(seen.has(s.name)) return false; seen.add(s.name); return true; })
+    .forEach(stk => {
+      const c = C[stk.tier];
+      const div = document.createElement('div');
+      div.className='stk-item'; div.dataset.nr=stk.nr;
+      div.innerHTML=`
+        <div class="stk-dot" style="background:${c.stroke}"></div>
+        <span class="stk-tier" style="color:${c.text}">${stk.tier}</span>
+        <span>${stk.name}</span>
+      `;
+      div.addEventListener('mouseenter', e => { mx=e.clientX; my=e.clientY; onHover(e,stk); });
+      div.addEventListener('mousemove',  e => { mx=e.clientX; my=e.clientY; posTooltip(); });
+      div.addEventListener('mouseleave', onLeave);
+      list.appendChild(div);
     });
-    div.addEventListener('mousemove', moveTooltip);
-    div.addEventListener('mouseleave', hideTooltip);
-    list.appendChild(div);
-  });
 }
 
-document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+function highlightSidebar(nr) {
+  document.querySelectorAll('.stk-item').forEach(el => {
+    const match = parseInt(el.dataset.nr)===nr;
+    el.classList.toggle('active', match);
+    if(match) el.scrollIntoView({block:'nearest',behavior:'smooth'});
+  });
+}
+function clearSidebarHighlight() {
+  document.querySelectorAll('.stk-item').forEach(el => el.classList.remove('active'));
+}
 
-// Filter buttons
-let activeFilter = 'all';
+// ── FILTER ───────────────────────────────────────────────────────────────────
+let activeFilter='all';
 document.getElementById('filter-bar').addEventListener('click', e => {
-  const btn = e.target.closest('.filter-btn');
-  if (!btn) return;
+  const btn = e.target.closest('.filter-btn'); if(!btn) return;
   activeFilter = btn.dataset.filter;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   placeNodes(activeFilter);
-  buildSidebarList(activeFilter);
+  buildSidebar(activeFilter);
 });
 
-// Tier legend click
+// tier legend click
 document.getElementById('tier-legend').addEventListener('click', e => {
-  const item = e.target.closest('.tier-item');
-  if (!item) return;
+  const item = e.target.closest('.tier-item'); if(!item) return;
   const tier = item.dataset.tier;
   const isActive = item.classList.contains('active');
-  document.querySelectorAll('.tier-item').forEach(i => i.classList.remove('active'));
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-
-  if (isActive) {
-    activeFilter = 'all';
+  document.querySelectorAll('.tier-item').forEach(i=>i.classList.remove('active'));
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(isActive) {
+    activeFilter='all';
     document.querySelector('[data-filter="all"]').classList.add('active');
   } else {
     item.classList.add('active');
-    activeFilter = tier;
+    activeFilter=tier;
     document.querySelector(`[data-filter="${tier}"]`)?.classList.add('active');
   }
   placeNodes(activeFilter);
-  buildSidebarList(activeFilter);
+  buildSidebar(activeFilter);
 });
 
-// Init
+// ── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
 drawRings();
 placeNodes();
-buildSidebarList();
+buildSidebar();
 </script>
 </body>
 </html>
