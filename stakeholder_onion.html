@@ -958,11 +958,16 @@ function onLeave() {
 
 function posTooltip() {
   const tw=330, th=260;
-  let l=mx+16, t=my+16;
-  if(l+tw > window.innerWidth-10)  l = mx-tw-16;
-  if(t+th > window.innerHeight-10) t = my-th-16;
-  tipEl.style.left = l+'px';
-  tipEl.style.top  = t+'px';
+
+  // bepaal kant van scherm
+  const isRight = mx > window.innerWidth / 2;
+  const isBottom = my > window.innerHeight / 2;
+
+  let l = isRight ? mx - tw - 20 : mx + 20;
+  let t = isBottom ? my - th - 20 : my + 20;
+
+  tipEl.style.left = l + 'px';
+  tipEl.style.top  = t + 'px';
 }
 
 function buildTooltip(stk) {
