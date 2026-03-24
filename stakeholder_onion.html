@@ -188,7 +188,9 @@
   /* tooltip */
   .tooltip {
     position: fixed; z-index: 1000;
-    background: #121c28; border: 1px solid var(--border);
+    background: rgba(18, 28, 40, 0.82);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
     border-radius: 12px; padding: 14px 16px;
     min-width: 280px; max-width: 340px;
     pointer-events: none; opacity: 0;
@@ -957,17 +959,8 @@ function onLeave() {
 }
 
 function posTooltip() {
-  const tw=330, th=260;
-
-  // bepaal kant van scherm
-  const isRight = mx > window.innerWidth / 2;
-  const isBottom = my > window.innerHeight / 2;
-
-  let l = isRight ? mx - tw - 20 : mx + 20;
-  let t = isBottom ? my - th - 20 : my + 20;
-
-  tipEl.style.left = l + 'px';
-  tipEl.style.top  = t + 'px';
+  tipEl.style.left = '24px';
+  tipEl.style.top  = '80px';
 }
 
 function buildTooltip(stk) {
